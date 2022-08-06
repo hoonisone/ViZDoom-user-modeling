@@ -56,3 +56,9 @@ def is_right(object, player):
     if object.visible == False:
         raise Exception('object가 visible일 때 만 수행 가능') 
     return (player.x+player.w/2) < (object.x + object.w/2)
+
+
+def get_pos_x(object, player):
+    if object.visible == False:
+        raise Exception('object가 visible일 때 만 수행 가능') 
+    return (object.x + object.w/2) - (player.x+player.w/2)

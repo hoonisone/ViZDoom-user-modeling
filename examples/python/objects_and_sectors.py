@@ -12,6 +12,7 @@ from random import choice
 import vizdoom as vzd
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
+import os
 
 DEFAULT_CONFIG = os.path.join(vzd.scenarios_path, "my_way_home.cfg")
 

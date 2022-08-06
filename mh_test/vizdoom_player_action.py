@@ -3,8 +3,8 @@ class PlayerAction(IntEnum):
     Atack = 0
     Run = 1
     b = 2
-    c = 3
-    d = 4
+    MoveRight = 3
+    MoveLeft = 4
     MoveBack = 5
     MoveFront = 6
     TurnRight = 7
@@ -21,7 +21,7 @@ class PlayerAction(IntEnum):
     rotateX = 18
 
 def make_action(action_dict):
-    action = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    action = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     for key in action_dict.keys():
         action[key] = action_dict[key]
     return action
