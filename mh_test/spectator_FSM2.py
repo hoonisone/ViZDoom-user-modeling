@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
 
     state = game.get_state()
-    get_map(state).show()
+    # get_map(state).show()
     
     map = np.ones(shape=(2000, 2000))*10000
     access = np.ones(shape=(2000, 2000))*255
@@ -157,8 +157,8 @@ if __name__ == "__main__":
 
     map = make_direction_map(access, ((500+1200)//8, (500+500)//8))
 
-    pil_image=Image.fromarray(map)
-    pil_image.show()
+    # pil_image=Image.fromarray(map)
+    # pil_image.show()
     
 
     while not game.is_episode_finished():
@@ -173,38 +173,54 @@ if __name__ == "__main__":
         print("angle", stateData.player.object.angle)
         print(math.fabs(math.fabs(stateData.player.object.angle-180)-180))
         if math.fabs(math.fabs(stateData.player.object.angle-180)-180) > 0.5:
-            if stateData.player.object.angle  < 1:
+            if stateData.player.object.angle  < 0.3:
                 game.make_action(make_action({
-                PlayerAction.rotateX: 0.5
+                PlayerAction.rotateX: 0.1
                 }))
-            elif stateData.player.object.angle  < 10:
+            elif stateData.player.object.angle  < 1:
                 game.make_action(make_action({
-                PlayerAction.rotateX: 5
+                PlayerAction.rotateX: 0.3
+                }))
+            elif stateData.player.object.angle  < 5:
+                game.make_action(make_action({
+                PlayerAction.rotateX: 0.8
+                }))
+            elif stateData.player.object.angle  < 30:
+                game.make_action(make_action({
+                PlayerAction.rotateX: 3
                 }))
             elif stateData.player.object.angle  < 180:
                 game.make_action(make_action({
                 PlayerAction.rotateX: 10
                 }))
-            elif stateData.player.object.angle  > 359:
+            elif stateData.player.object.angle  > 359.7:
                 game.make_action(make_action({
                 PlayerAction.rotateX: -0.1
                 }))
-            elif stateData.player.object.angle  > 350:
+            elif stateData.player.object.angle  > 359:
                 game.make_action(make_action({
-                PlayerAction.rotateX: -1
+                PlayerAction.rotateX: -0.3
+                }))
+            elif stateData.player.object.angle  > 355:
+                game.make_action(make_action({
+                PlayerAction.rotateX: -0.8
+                }))
+            elif stateData.player.object.angle  > 330:
+                game.make_action(make_action({
+                PlayerAction.rotateX: -3
                 }))
             else:
                 game.make_action(make_action({
                 PlayerAction.rotateX: -10
                 }))
-        
-        game.make_action(make_action({
-            # PlayerAction.Atack:True,
-            PlayerAction.MoveLeft: (map[y+1,x] < map[y,x]),
-            PlayerAction.MoveRight: (map[y-1,x] < map[y,x]),
-            PlayerAction.MoveBack: (map[y,x-1] < map[y,x]),
-            PlayerAction.MoveFront: (map[y,x+1] < map[y,x]),
-        }))
+        else:
+            game.make_action(make_action({
+                # PlayerAction.Atack:True,
+                PlayerAction.MoveLeft: (map[y+1,x] < map[y,x]),
+                PlayerAction.MoveRight: (map[y-1,x] < map[y,x]),
+                PlayerAction.MoveBack: (map[y,x-1] < map[y,x]),
+                PlayerAction.MoveFront: (map[y,x+1] < map[y,x]),
+            }))
         print(stateData.player.pos)
         objects = stateData.get_object_date_list(visible=True)
         objects = extract_enemy(objects)

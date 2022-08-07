@@ -143,12 +143,21 @@ if __name__ == "__main__":
             # r = game.make_action([False, False, False, False, False, False, False, True, False, False])   
         else:
             print("Target: %s"% target.name)
-            if is_in_shot_range(target, stateData.player):
-                r = game.make_action(action2)
-            elif is_right(target, stateData.player):
-                r = game.make_action(action3)
-            elif is_left(target, stateData.player):
-                r = game.make_action(action4)
+            print(55 * get_pos_x(target, stateData.player)/(1920/2))
+            game.make_action(make_action({
+                PlayerAction.Atack:True,
+                # PlayerAction.MoveFront:True,
+                PlayerAction.rotateX: 55 * get_pos_x(target, stateData.player)/(1920/2)/2,
+                PlayerAction.MoveRight : True,
+                PlayerAction.Run: True,
+                PlayerAction.MoveFront : True
+            }))
+            # if is_in_shot_range(target, stateData.player):
+            #     r = game.make_action(action2)
+            # elif is_right(target, stateData.player):
+            #     r = game.make_action(action3)
+            # elif is_left(target, stateData.player):
+            #     r = game.make_action(action4)
 
         print(game.get_last_action())             
 
