@@ -2,5 +2,5 @@ from enum import IntEnum
 
 import numpy as np
 
-class A (IntEnum):
-    a = 1
+print(5//3)
+print(5/3)

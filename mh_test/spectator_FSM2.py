@@ -9,6 +9,8 @@
 #####################################################################
 
 from argparse import ArgumentParser
+from inspect import modulesbyfile
+from msilib.schema import MoveFile
 import os
 from pydoc import ispackage
 from time import sleep
@@ -131,102 +133,146 @@ if __name__ == "__main__":
     game.init()
 
     game.new_episode()
-
-
-
-
-
-    state = game.get_state()
-    # get_map(state).show()
+    # state = game.get_state()
+    # access_map = AccessMap(state)
+    # # access_map.show()
+    # map = DirectionMap(access_map, (-200, 600))
+    # map.show()
+    # map.show()
     
-    map = np.ones(shape=(2000, 2000))*10000
-    access = np.ones(shape=(2000, 2000))*255
+    while not game.is_episode_finished():        
+        
+        while True:
+            if MoveTo(game, (-200, 600)).do():
+                break
 
-    for s in state.sectors:
-        for l in s.lines:
-            if l.is_blocking:
-                draw_wall(access, (500, 500), l.x1, l.y1, l.x2, l.y2)
+        while True:
+            if MoveTo(game, (1200, 600)).do():
+                break
+        # stateData = StateData(game.get_state())        
+        
+        # if math.fabs(stateData.player.object.angle) > 1:
+        #     game.make_action(make_action({
+        #         PlayerAction.rotateX: stateData.player.object.angle
+        #     }))
 
-    access = max_pooling(access)
-    access = max_pooling(access)
-    access = max_pooling(access)
-    # print(access.shape)
-
-    # pil_image=Image.fromarray(access)
-    # pil_image.show()
-
-    map = make_direction_map(access, ((500+1200)//8, (500+500)//8))
-
-    # pil_image=Image.fromarray(map)
-    # pil_image.show()
+        # x = int(stateData.player.pos[0])
+        # y = int(stateData.player.pos[1])
     
+        # if keyboard.is_pressed("Enter"):
 
-    while not game.is_episode_finished():
-        state = game.get_state()
-        game.advance_action() # 이거 있어야 조작 가능
-        stateData = StateData(state)        
+        #     print("     ", map[(y,x+1)])
+        #     print(map[(y+1,x)], map[(y,x)], map[(y-1,x)])
+        #     print("     ", map[(y,x-1)])
 
-        x = int((500 + stateData.player.pos[0])//8)
-        y = int((500 + stateData.player.pos[1])//8)
+        #     while keyboard.is_pressed("Enter"):
+        #         continue
 
-        game.make_action(make_action({}))
-        print("angle", stateData.player.object.angle)
-        print(math.fabs(math.fabs(stateData.player.object.angle-180)-180))
-        if math.fabs(math.fabs(stateData.player.object.angle-180)-180) > 0.5:
-            if stateData.player.object.angle  < 0.3:
-                game.make_action(make_action({
-                PlayerAction.rotateX: 0.1
-                }))
-            elif stateData.player.object.angle  < 1:
-                game.make_action(make_action({
-                PlayerAction.rotateX: 0.3
-                }))
-            elif stateData.player.object.angle  < 5:
-                game.make_action(make_action({
-                PlayerAction.rotateX: 0.8
-                }))
-            elif stateData.player.object.angle  < 30:
-                game.make_action(make_action({
-                PlayerAction.rotateX: 3
-                }))
-            elif stateData.player.object.angle  < 180:
-                game.make_action(make_action({
-                PlayerAction.rotateX: 10
-                }))
-            elif stateData.player.object.angle  > 359.7:
-                game.make_action(make_action({
-                PlayerAction.rotateX: -0.1
-                }))
-            elif stateData.player.object.angle  > 359:
-                game.make_action(make_action({
-                PlayerAction.rotateX: -0.3
-                }))
-            elif stateData.player.object.angle  > 355:
-                game.make_action(make_action({
-                PlayerAction.rotateX: -0.8
-                }))
-            elif stateData.player.object.angle  > 330:
-                game.make_action(make_action({
-                PlayerAction.rotateX: -3
-                }))
-            else:
-                game.make_action(make_action({
-                PlayerAction.rotateX: -10
-                }))
-        else:
-            game.make_action(make_action({
-                # PlayerAction.Atack:True,
-                PlayerAction.MoveLeft: (map[y+1,x] < map[y,x]),
-                PlayerAction.MoveRight: (map[y-1,x] < map[y,x]),
-                PlayerAction.MoveBack: (map[y,x-1] < map[y,x]),
-                PlayerAction.MoveFront: (map[y,x+1] < map[y,x]),
-            }))
-        print(stateData.player.pos)
-        objects = stateData.get_object_date_list(visible=True)
-        objects = extract_enemy(objects)
-        target = get_closest_object(objects)
 
-        print(map[y, x+1], map[y, x-1], map[y+1, x], map[y, x], map[y-1, x])
+        # # print(x, y)
+
+        # if map[(y,x)] > 3:
+        #     right = map[(y-1,x)] < map[(y,x)]
+        #     left = map[(y+1,x)] < map[(y,x)] and not right
+        #     front = (map[(y,x+1)] < map[(y,x)])
+        #     back = (map[(y,x-1)] < map[(y,x)]) and not front
+
+
+        #     game.make_action(make_action({
+        #         PlayerAction.MoveFront: front,
+        #         PlayerAction.MoveBack: back,
+        #         PlayerAction.MoveRight: right,
+        #         PlayerAction.MoveLeft: left
+        #     }))
+
+            # if front:
+            #     if right:
+            #         angle = 315
+            #     elif left:
+            #         angle = 45
+            #     else:
+            #         angle = 0
+
+            # elif back:
+            #     if right:
+            #         angle = 225
+            #     elif left:
+            #         angle = 135
+            #     else:
+            #         angle = 180
+            # else:
+            #     if right:
+            #         angle = 270
+            #     elif left:
+            #         angle = 90
+            #     else:
+            #         angle = -1
+            
+            # if angle > 0:
+            #     game.make_action(make_action({
+            #         PlayerAction.rotateX: -angle,
+            #         PlayerAction.MoveFront: True
+            #     }))
+
+
+
+
+
+        
+            # if stateData.player.object.angle  < 0.3:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: 0.1
+            #     }))
+            # elif stateData.player.object.angle  < 1:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: 0.3
+            #     }))
+            # elif stateData.player.object.angle  < 5:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: 0.8
+            #     }))
+            # elif stateData.player.object.angle  < 30:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: 3
+            #     }))
+            # elif stateData.player.object.angle  < 180:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: 10
+            #     }))
+            # elif stateData.player.object.angle  > 359.7:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: -0.1
+            #     }))
+            # elif stateData.player.object.angle  > 359:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: -0.3
+            #     }))
+            # elif stateData.player.object.angle  > 355:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: -0.8
+            #     }))
+            # elif stateData.player.object.angle  > 330:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: -3
+            #     }))
+            # else:
+            #     game.make_action(make_action({
+            #     PlayerAction.rotateX: -10
+            #     }))
+        # else:
+        #     game.make_action(make_action({
+        #         # PlayerAction.Atack:True,
+        #         PlayerAction.MoveLeft: (map[y+1,x] < map[y,x]),
+        #         PlayerAction.MoveRight: (map[y-1,x] < map[y,x]),
+        #         PlayerAction.MoveBack: (map[y,x-1] < map[y,x]),
+        #         PlayerAction.MoveFront: (map[y,x+1] < map[y,x]),
+        #     }))
+        # print(stateData.player.pos)
+        # objects = stateData.get_object_date_list(visible=True)
+        # objects = extract_enemy(objects)
+        # target = get_closest_object(objects)
+
+        # print(map[y, x+1], map[y, x-1], map[y+1, x], map[y, x], map[y-1, x])
         # if (target == None):
         #     r = game.make_action(action1)
         #     # r = game.make_action([False, False, False, False, False, False, False, True, False, False])   
@@ -259,69 +305,14 @@ if __name__ == "__main__":
 
 
 
-        if keyboard.is_pressed("Enter"):    
-            print("State: %s" % str(state.number))
+        # if keyboard.is_pressed("Enter"):    
+        #     print("State: %s" % str(state.number))
 
-            get_map(state).show()
-
-
-
-            # game.make_action(make_action({
-            #     # PlayerAction.Atack:True,
-            #     # PlayerAction.MoveFront:True,
-            #     PlayerAction.rotateX: 55 * get_pos_x(target, stateData.player)/(1920/2)
-            # }))
+        #     get_map(state).show()
 
 
-
-            # objects = stateData.get_object_date_list(type = ObjectName.Medikit , visible=True)
-            # pos_list = []
-            # for o in objects:
-            #     pos_list.append(o.type)
-            # print(len(objects))
-
-            
-            
-            # print("Total: %d" % len(state.objects))
-
-            # dictInfor = OrganizeObjectInfor(state.objects)
-            
-            # print(dictInfor)    
-            
-
-            #print(IsThereTargetInMySight(state, "Medikit"))
-            # print(GetAllObjectIdListInView(state, "Medikit"))
-
-            # all_visible_id = getAllIdByName(state, "Medikit", onlyVisable=True)
-            # print(len(all_visible_id))
-            # if len(all_visible_id) != 0:
-            #     all_visible_obj = getAllObjectsByIdList(state, all_visible_id)
-            #     closest_object = getClosestObject(getPos(getPlayer(state)), all_visible_obj)
-            #     print(getPos(closest_object))
-
-
-            # palyer = GetPlayer(state)
-            # target_id_list = GetAllIdByName(state, "Medikit")
-            # if len(target_id_list) != 0:
-            #     target_object = GetObjectById(state, target_id_list[0])
-            #     dist = Square_dist(GetPos(player), GetPos(target_object))
-            #     print(dist)
-
-
-            # print sector infor
-            # for s in state.sectors:
-
-            #     for l in s.lines:
-            #         if l.is_blocking:
-            #             plt.plot([l.x1, l.x2], [l.y1, l.y2], color='black', linewidth=2)
-                
-            #     break
-
-            # # Show map
-            # plt.show()
-
-            while keyboard.is_pressed("Enter"):
-                continue
+        #     while keyboard.is_pressed("Enter"):
+        #         continue
         
 
     game.close()
