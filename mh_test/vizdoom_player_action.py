@@ -1,6 +1,13 @@
+
 from enum import IntEnum
 from abc import abstractmethod
+
+from multiprocessing.reduction import steal_handle
+import secrets
+from stringprep import map_table_b2
+from telnetlib import SE
 from typing import overload
+from unittest import getTestCaseNames
 from vizdoom_player_action import * 
 from draw_map import *
 from vizdoom_object_data import *
@@ -35,22 +42,22 @@ def make_action(action_dict):
 
 
 
-class DeathmatchAction:
-    def set_angle(stateData, angle):
-        action = make_action({
-            PlayerAction.rotateX: stateData.player.object.angle-angle
-        })
-        return (action, True)
+# class DeathmatchAction:
+#     def set_angle(stateData, angle):
+#         action = make_action({
+#             PlayerAction.rotateX: stateData.player.object.angle-angle
+#         })
+#         return (action, True)
 
-    def MoveTo(stateData, pos):
-        make_action({
-            # PlayerAction.Atack:True,
-            PlayerAction.MoveLeft: (map[y+1,x] < map[y,x]),
-            PlayerAction.MoveRight: (map[y-1,x] < map[y,x]),
-            PlayerAction.MoveBack: (map[y,x-1] < map[y,x]),
-            PlayerAction.MoveFront: (map[y,x+1] < map[y,x]),
-        })
-        pass
+#     def MoveTo(stateData, pos):
+#         make_action({
+#             # PlayerAction.Atack:True,
+#             PlayerAction.MoveLeft: (map[y+1,x] < map[y,x]),
+#             PlayerAction.MoveRight: (map[y-1,x] < map[y,x]),
+#             PlayerAction.MoveBack: (map[y,x-1] < map[y,x]),
+#             PlayerAction.MoveFront: (map[y,x+1] < map[y,x]),
+#         })
+#         pass
 
 
 
@@ -64,7 +71,7 @@ class AbstractAction:
     def do(self): # 한 스텝 수행 후 종료 여부 반환
         pass
 
-    def do_all(self): # 액션의 전체 과정을 수행
+    def do_all(self) -> bool: # 액션의 전체 과정을 수행
         while True:
             if self.do():
                 break
@@ -80,17 +87,23 @@ class RotateTo(AbstractAction):
         }))
         return True
 
+class Section(IntEnum):
+    Center = 0,
+    Top = 1,
+    Right = 2,
+    Left = 3,
+    Bottom = 4
+
 
 class MoveTo(AbstractAction):
     
-    def __init__(self, game, target_pos): 
+    access_map = None
+
+    def __init__(self, game, directionMap): 
         self.game = game
-        access_map = AccessMap(game.get_state())
-        self.map = DirectionMap(access_map, target_pos)
+        self.map = directionMap
 
-
-
-    def do(self):
+    def do(self) -> bool:
         while True:
             stateData = StateData(self.game.get_state())
             x = int(stateData.player.pos[0])
@@ -106,6 +119,7 @@ class MoveTo(AbstractAction):
                 back = (self.map[(y,x-1)] < self.map[(y,x)]) and not front
 
                 self.game.make_action(make_action({
+                    PlayerAction.Run: True,
                     PlayerAction.MoveFront: front,
                     PlayerAction.MoveBack: back,
                     PlayerAction.MoveRight: right,
@@ -113,3 +127,37 @@ class MoveTo(AbstractAction):
                 }))
                 return False
 
+class MoveToSection(AbstractAction):
+
+    map_dict = {}
+
+    def __init__(self, game, section: Section):
+        
+        access_map = AccessMap(game)
+        access_map.show()
+        direction_map = MoveToSection.get_direction_map(access_map, section)
+        self.moveTo = MoveTo(game, direction_map)
+
+    @staticmethod
+    def get_direction_map(accessMap, section):
+        if section not in MoveToSection.map_dict:
+            target_pos = MoveToSection.get_target_pos(section)
+            MoveToSection.map_dict[section] = HeightMap(accessMap, target_pos)
+
+        return MoveToSection.map_dict[section]
+
+    @staticmethod
+    def get_target_pos(section):
+        if section == Section.Center:
+            return (600, 600)
+        if section == Section.Top:
+            return (600, 1200)
+        if section == Section.Bottom:
+            return (600, -100)
+        if section == Section.Right:
+            return (1200, 600)
+        if section == Section.Left:
+            return (-100, 600)
+
+    def do(self):
+        return self.moveTo.do()

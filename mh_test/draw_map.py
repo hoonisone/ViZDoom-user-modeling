@@ -70,43 +70,58 @@ def get_map(state):
 
 class AccessMap:
 
-    adjust_pos = (500, 500)
-    pooling = (8, 8)
-    map = None
+    def __init__(self, game, adjust_pos = (500, 500), pooling = (8, 8)): # adjust_pos: 원점 좌표 => 음수인 좌표를 모두 양수로 만들기 위함
+        self.adjust_pos = adjust_pos
+        self.pooling = pooling
 
-    def __init__(self, state):
-        self.map = np.ones(shape=(2000, 2000))*255
+        # 맵 생성
+        state = game.get_state()
+        map = np.ones(shape=(2000, 2000))*255            # game에서 맵의 크기를 확인하고 세팅하는 코드로 수정 필요
 
+        # 벽 그리기
         for s in state.sectors:
             for l in s.lines:
                 if l.is_blocking:
-                    draw_wall(self.map, self.adjust_pos, l.x1, l.y1, l.x2, l.y2)
+                    draw_wall(map, self.adjust_pos, l.x1, l.y1, l.x2, l.y2)
 
-        self.map = max_pooling(self.map)
-        self.map = max_pooling(self.map)
-        self.map = max_pooling(self.map)
+        # 축소 8x8 -> 1x1
+        map = max_pooling(map)
+        map = max_pooling(map)
+        map = max_pooling(map)
 
-        for y in range(self.map.shape[0]):
-            for x in range(self.map.shape[1]):
-                if self.map[y, x] == 0:
+        # 벽 키우기(두껍게)
+        for y in range(map.shape[0]):
+            for x in range(map.shape[1]):
+                if map[y, x] == 0:
                     for a in range(-1, 2, 1):
                         for b in range(-1, 2, 1):
-                            if (0 <= x+b) and (x+b < self.map.shape[1]) and (0 <= y+a) and (y+a < self.map.shape[0]):
-                                self.map[y+a, x+b] = -1
+                            if (0 <= x+b) and (x+b < map.shape[1]) and (0 <= y+a) and (y+a < map.shape[0]):
+                                map[y+a, x+b] = -1
 
-        for y in range(self.map.shape[0]):
-            for x in range(self.map.shape[1]):
-                if self.map[y, x] == -1:
-                    self.map[y, x] = 0
+        for y in range(map.shape[0]):
+            for x in range(map.shape[1]):
+                if map[y, x] == -1:
+                    map[y, x] = 0
 
-
-        self.map = self.map
+        # static 변수에 저장
+        self.map = map
+        self.shape = self.map.shape
 
     def show(self):
         pil_image=Image.fromarray(self.map)
-        pil_image.show()
 
-class DirectionMap:
+    def get_map_pos(self, origin_pos): # 원래 좌표를 맵 위로 사상하여 반환 (평행 이동 -> 축소)
+        # x축의 축소 비율이 a일 때 new_x=x//a, rest_ratio_x=나머지/a 이다.
+
+        new_x = (origin_pos[0]+self.adjust_pos[0])//self.pooling[0]
+        new_y = (origin_pos[1]+self.adjust_pos[1])//self.pooling[1]
+        rest_x = ((origin_pos[0]+self.adjust_pos[0])%self.pooling[0])/self.pooling[0]
+        rest_y = ((origin_pos[1]+self.adjust_pos[1])%self.pooling[1])/self.pooling[1]
+
+        return (new_x, new_y, rest_x, rest_y)
+
+
+class HeightMap: # map에서 높이 값을 표현(벽은 높이가 무한대라 가정)
 
     map = None
     adjust_pos = None
@@ -116,13 +131,13 @@ class DirectionMap:
 
         self.adjust_pos = access_map.adjust_pos
         self.pooling = access_map.pooling
-        self.map = np.ones(shape=access_map.map.shape)*10000
-        
+        self.shape = access_map.shape
+        self.access_map = access_map
+        self.map = np.ones(shape=access_map.shape)*10000
 
         work_list = []
-        target_x = (target_pos[0]+self.adjust_pos[0])//self.pooling[0]
-        target_y = (target_pos[1]+self.adjust_pos[1])//self.pooling[1]
-        work_list.append((target_x, target_y, 1))
+        map_pos = access_map.get_map_pos(target_pos)
+        work_list.append((map_pos[0], map_pos[1], 1))
         
         while(len(work_list) != 0):
             x, y, l = work_list[0]
@@ -142,22 +157,17 @@ class DirectionMap:
                 work_list.append((x, y-1, l+3))
 
     def __getitem__(self, pos):
-        x = (pos[1]+self.adjust_pos[0])//self.pooling[0]
-        y = (pos[0]+self.adjust_pos[1])//self.pooling[1]
-        d_x = (pos[1]+self.adjust_pos[0])%self.pooling[0]
-        d_y = (pos[0]+self.adjust_pos[1])%self.pooling[1]
+        (x, y, dx, dy) = self.access_map.get_map_pos(pos)
+        # print(x, y, dx, dy)
 
+        dist_x = self.map[y, x+1] - self.map[y, x]
+        dist_y = self.map[y+1, x] - self.map[y, x]
 
-        dx = (self.map[y, x+1] - self.map[y, x])*(d_x/self.pooling[1])
-        dy = (self.map[y+1, x] - self.map[y, x])*(d_y/self.pooling[0])
-        # dx = 0
-        # dy = 0
-
+        dx = dist_x*dx
+        dy = dist_y*dy
 
         return self.map[y, x] + dx + dy
 
     def show(self):
         pil_image=Image.fromarray(self.map)
         pil_image.show()
-
-    

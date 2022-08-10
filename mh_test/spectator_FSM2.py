@@ -141,13 +141,24 @@ if __name__ == "__main__":
     # map.show()
     
     while not game.is_episode_finished():        
-        
+        action = MoveToSection(game, Section.Top)
         while True:
-            if MoveTo(game, (-200, 600)).do():
+            if action.do():
                 break
 
+        action = MoveToSection(game, Section.Bottom)
         while True:
-            if MoveTo(game, (1200, 600)).do():
+            if action.do():
+                break
+
+        action = MoveToSection(game, Section.Right)
+        while True:
+            if action.do():
+                break
+
+        action = MoveToSection(game, Section.Left)
+        while True:
+            if action.do():
                 break
         # stateData = StateData(game.get_state())        
         

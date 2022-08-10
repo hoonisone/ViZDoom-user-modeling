@@ -54,7 +54,7 @@ class MoveTo(AbstractAction):
     
     def __init__(self, game, target_pos): 
         access_map = AccessMap(game.get_state())
-        self.map = DirectionMap(access_map, target_pos)
+        self.map = HeightMap(access_map, target_pos)
 
 
 
