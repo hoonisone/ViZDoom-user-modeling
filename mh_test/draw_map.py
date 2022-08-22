@@ -77,6 +77,8 @@ class AccessMap:
         # 맵 생성
         state = game.get_state()
         map = np.ones(shape=(2000, 2000))*255            # game에서 맵의 크기를 확인하고 세팅하는 코드로 수정 필요
+        # 0: accessable, 1: unaccessable
+
 
         # 벽 그리기
         for s in state.sectors:
@@ -90,13 +92,16 @@ class AccessMap:
         map = max_pooling(map)
 
         # 벽 키우기(두껍게)
+        w = 1 # 두깨
         for y in range(map.shape[0]):
-            for x in range(map.shape[1]):
+            for x in range(map.shape[1]): 
                 if map[y, x] == 0:
-                    for a in range(-1, 2, 1):
-                        for b in range(-1, 2, 1):
-                            if (0 <= x+b) and (x+b < map.shape[1]) and (0 <= y+a) and (y+a < map.shape[0]):
-                                map[y+a, x+b] = -1
+                    for a in range(-w, w+1, 1):
+                        for b in range(-w, w+1, 1):
+                            if  (0 <= y+a) and (y+a < map.shape[0]) and (0 <= x+b) and (x+b < map.shape[1]):
+                                if map[y+a, x+b] != 0: # 기존에 벽이 아닌 경우
+                                    map[y+a, x+b] = -1
+                                    
 
         for y in range(map.shape[0]):
             for x in range(map.shape[1]):
@@ -107,8 +112,10 @@ class AccessMap:
         self.map = map
         self.shape = self.map.shape
 
+
     def show(self):
         pil_image=Image.fromarray(self.map)
+        pil_image.show()
 
     def get_map_pos(self, origin_pos): # 원래 좌표를 맵 위로 사상하여 반환 (평행 이동 -> 축소)
         # x축의 축소 비율이 a일 때 new_x=x//a, rest_ratio_x=나머지/a 이다.

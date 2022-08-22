@@ -108,15 +108,32 @@ class MoveTo(AbstractAction):
             stateData = StateData(self.game.get_state())
             x = int(stateData.player.pos[0])
             y = int(stateData.player.pos[1])
-
+            
             if self.map[(y,x)] < 10:
                 return True
             else:
-                RotateTo(self.game, 0).do_all() # 각도를 0으로            
+                # RotateTo(self.game, 0).do_all() # 각도를 0으로            
                 right = self.map[(y-1,x)] < self.map[(y,x)]
                 left = self.map[(y+1,x)] < self.map[(y,x)] and not right
                 front = (self.map[(y,x+1)] < self.map[(y,x)])
                 back = (self.map[(y,x-1)] < self.map[(y,x)]) and not front
+
+                xd = 1 if right else (-1 if left else 0)
+                yd = 1 if front else (-1 if back else 0)
+                destination_angle = self.get_angle_from_direction(xd, yd)
+                player_angle = StateData(self.game.get_state()).player.object.angle
+                relative_angle = ((destination_angle-player_angle) + 360)%360
+
+                direction = self.get_direction_from_angle(relative_angle)
+
+                right = True if direction[0] == 1 else False
+                left = True if direction[0] == -1 else False
+
+                front = True if direction[1] == 1 else False
+                back = True if direction[1] == -1 else False
+                
+                
+                # print(self.get_angle_from_direction())
 
                 self.game.make_action(make_action({
                     PlayerAction.Run: True,
@@ -127,6 +144,24 @@ class MoveTo(AbstractAction):
                 }))
                 return False
 
+    def get_angle_from_direction(self, x, y):
+        # x, y방향으로 움직이는 여부를 가지고 이동 방향을 구한다.
+        direction_list = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)] # (x, y) angle 0 부터 45도 단위로 증가
+
+
+
+        cur_d = (x, y)
+        for i, d in enumerate(direction_list):
+            if cur_d == d:
+                return i * 45
+        return 0 # 여기까지 올 일은 없지만 일단 작성함
+
+    def get_direction_from_angle(self, angle):
+        direction_list = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
+        angle = round(angle/45)
+        return direction_list[angle]
+
+
 class MoveToSection(AbstractAction):
 
     map_dict = {}
@@ -134,9 +169,11 @@ class MoveToSection(AbstractAction):
     def __init__(self, game, section: Section):
         
         access_map = AccessMap(game)
-        access_map.show()
         direction_map = MoveToSection.get_direction_map(access_map, section)
+        direction_map.show()
+
         self.moveTo = MoveTo(game, direction_map)
+        
 
     @staticmethod
     def get_direction_map(accessMap, section):
@@ -160,4 +197,7 @@ class MoveToSection(AbstractAction):
             return (-100, 600)
 
     def do(self):
+        
         return self.moveTo.do()
+
+
