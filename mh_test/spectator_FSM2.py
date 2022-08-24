@@ -147,22 +147,22 @@ if __name__ == "__main__":
     while not game.is_episode_finished():   
 
         action = MoveToSection(game, Section.Top)
-        while True:
+        while not game.is_episode_finished():
             if action.do():
                 break
 
         action = MoveToSection(game, Section.Bottom)
-        while True:
+        while not game.is_episode_finished():
             if action.do():
                 break
 
         action = MoveToSection(game, Section.Right)
-        while True:
+        while not game.is_episode_finished():
             if action.do():
                 break
 
         action = MoveToSection(game, Section.Left)
-        while True:
+        while not game.is_episode_finished():
             if action.do():
                 break
 

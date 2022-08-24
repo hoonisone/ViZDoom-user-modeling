@@ -3,7 +3,7 @@ from tkinter.messagebox import NO
 from turtle import st
 import numpy as np
 from vizdoom_object_name import *
-
+import math
 
 def dist(p1, p2):
     p1 = np.array(p1)
@@ -97,4 +97,32 @@ class StateData:
         return type_objects_dict
 
 
+
+def get_player(game):
+    for obj in game.get_state().objects:
+        if obj.name == "DoomPlayer":
+            return obj
+
+    return None
+
+def get_angle_from_player_to_direction(px, py, dx, dy): # player를 기준으로 (x, y)의 방향을 angle(0~359)로 반환
+
+    # 상대 거리 좌표
+    x_dist = dx - px
+    y_dist = dy - py
+
+    d = dist((dx, dy), (px, py))
+
+    if x_dist == 0:
+        if y_dist > 0:
+            return 90
+        else:
+            return 270
+
+    a = math.acos(x_dist/d)/math.pi*180
+    if y_dist < 0:
+        a =  360-a # x 축 대칭
+
+    return a
+    
 
