@@ -8,3 +8,4 @@ class A:
 
 
 print(type(A()))
+

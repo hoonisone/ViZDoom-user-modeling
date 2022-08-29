@@ -1,6 +1,8 @@
 from pickletools import float8
+from time import get_clock_info
 from tkinter.messagebox import NO
 from turtle import st
+from winsound import PlaySound
 import numpy as np
 from vizdoom_object_name import *
 import math
@@ -17,7 +19,7 @@ class ObjectData:
     def __init__(self, object):
         self.id = object.id
         self.object = object
-        self.name = ObjectName(ObjectName.ToEnum(object.name))
+        self.name = DoomObject(DoomObject.ToEnum(object.name))
         self.pos = (object.position_x, object.position_y)
         self.visible = False
 
@@ -33,7 +35,7 @@ class StateData:
         self.set_label_infor(state)
 
 
-        self.player = self.get_object_date_list(name = ObjectName.DoomPlayer)[0]
+        self.player = self.get_object_date_list(name = DoomObject.DoomPlayer)[0]
         
     def set_label_infor(self, state): # visible의 경우 label 정보를 세팅해줌
         for label in state.labels:
@@ -52,7 +54,7 @@ class StateData:
         # Player 찾기
         player = None
         for object in self.id_object_dict.values():
-            if object.name == ObjectName.DoomPlayer:
+            if object.name == DoomObject.DoomPlayer:
                 player = object
                 break
         
@@ -95,6 +97,99 @@ class StateData:
                 type_objects_dict[object.name] = []
             type_objects_dict[object.name].append(object)
         return type_objects_dict
+
+
+class StateData2:
+
+    def __init__(self, state):
+        self.state = state
+        self.player = None
+        self.enemies = None
+        self.closest_enomy = None
+        self.id_object_dict = None
+        self.enemy_labels = None
+        self.closest_enemy_label = None
+
+    def get_player(self):
+        if self.player == None:
+            for object in self.state.objects:
+                if object.name == "DoomPlayer":
+                    self.player = object
+                    break     
+        
+        return self.player
+    
+    def is_enemy(self, object): # object가 적인지 판단.
+        return object.name in enemy_name_list
+
+    def get_enemies(self): # 존재하는 모든 적 OBJECT를 담은 리스트 반환
+        if self.enemies == None:
+            enemies= []
+            for object in self.state.objects:
+                if self.is_enemy(object):
+                    enemies.append(object)
+
+            self.enemies = enemies
+
+        return self.enemies
+
+
+    def get_closest_enomy(self):
+        if self.closest_enomy == None:
+            min_dist = 10000000
+            min_enemy = None
+            for object in self.get_enemies():
+                dist = self.get_dist_from_player(object)
+                if dist < min_dist:
+                    min_enemy = object
+                    min_dist = dist
+            self.closest_enomy = min_enemy
+        
+        return self.closest_enomy
+                
+    def get_dist_from_player(self, object):
+        player = self.get_player()
+        player_pos = (player.position_x, player.position_y)
+        object_pos = (object.position_x, object.position_y)
+        return dist(player_pos, object_pos)
+
+    def dist(p1, p2):
+        p1 = np.array(p1)
+        p2 = np.array(p2)
+        return np.sqrt(np.sum(np.square(p1-p2)))
+
+    def get_id_object_dict(self):
+        if self.id_object_dict == None:
+            id_object_dict = {}
+            for object in self.state.objects:
+                id_object_dict[object.id] = object
+            self.id_object_dict = id_object_dict
+
+        return self.id_object_dict
+
+    def get_enemy_labels(self):
+        id_object_dict = self.get_id_object_dict()
+        if self.enemy_labels == None:
+            enemy_labels = []
+            for label in self.state.labels:
+                if self.is_enemy(id_object_dict[label.object_id]):
+                    enemy_labels.append(label)
+            self.enemy_labels = enemy_labels
+
+        return self.enemy_labels
+
+    def get_closest_enemy_label(self):
+        if self.closest_enemy_label is None:
+            min_dist = 1000000000
+            min_enemy_label = None
+            for enemy_label in self.get_enemy_labels():
+                object = self.get_id_object_dict()[enemy_label.object_id]
+                dist = self.get_dist_from_player(object)
+                if dist < min_dist:
+                    min_dist = dist
+                    min_enemy_label = enemy_label
+            self.closest_enemy_label = min_enemy_label
+        return self.closest_enemy_label
 
 
 

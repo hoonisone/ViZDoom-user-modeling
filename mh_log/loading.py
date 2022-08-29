@@ -1,6 +1,6 @@
 import json
 
-with open("foo.txt", "r") as f:
+with open("log.txt", "r") as f:
     s = f.readline()
 
 

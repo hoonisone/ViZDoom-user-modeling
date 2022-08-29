@@ -1,4 +1,8 @@
 from enum import Enum
+from typing import ClassVar
+
+
+enemy_name_list = ["Demon", "Zombieman", "ChaingunGuy", "ShotgunGuy", "HellKnight", "MarineChainsawVzd"]
 
 object_name_dict = {}
 object_name_dict["BlueArmor"] = 1
@@ -32,7 +36,7 @@ object_name_dict["Rocket"] = 27
 
 
 
-class ObjectName(Enum):
+class DoomObject(Enum):
     BlueArmor = 1
     Medikit = 2
     DoomPlayer = 3
@@ -62,6 +66,16 @@ class ObjectName(Enum):
     Blood = 26
     Rocket = 27
 
+    
+
     @classmethod
     def ToEnum(self, str_val):
-        return ObjectName(object_name_dict[str_val])
+        return DoomObject(object_name_dict[str_val])
+
+#     def is_enemy(self):
+#         print(self.value)
+#         print(self.enemy_name_list[0])
+#         # return self.value in self.enemy_name_list
+
+# print(DoomObject.enemy_name_list[0])
+# print(DoomObject(1).is_enemy())

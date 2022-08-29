@@ -6,7 +6,7 @@ import numpy as np
 from vizdoom_object_data import *
 from vizdoom_object_name import *
 import math
-enemy_name_list = [ObjectName.Demon, ObjectName.Zombieman, ObjectName.ChaingunGuy, ObjectName.ShotgunGuy, ObjectName.HellKnight, ObjectName.MarineChainsawVzd]
+enemy_name_list = [DoomObject.Demon, DoomObject.Zombieman, DoomObject.ChaingunGuy, DoomObject.ShotgunGuy, DoomObject.HellKnight, DoomObject.MarineChainsawVzd]
 
 def is_any_enemy_ahead(stateData):
     enemy_object_list = []
@@ -31,7 +31,7 @@ def get_closest_object(list):
     dist = 10000000
 
     for o in list:
-        if o.name == ObjectName.DoomPlayer:
+        if o.name == DoomObject.DoomPlayer:
             continue
         if o.dist_to_player < dist:
             dist = o.dist_to_player
