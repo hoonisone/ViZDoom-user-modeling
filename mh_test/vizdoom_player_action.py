@@ -162,8 +162,9 @@ class AimActioner(AbstractActioner):
         #     return 
         
         
-        v = math.sin(time())
-        action_order_sheet[PlayerAction.rotateX] = min(2, max(-3, v*4))
+        v = math.sin(time()/0.5)
+        # action_order_sheet[PlayerAction.rotateX] = min(2, max(-3, 1+v*4))
+        action_order_sheet[PlayerAction.rotateX] = 3
         return
         if v > 0:
             action_order_sheet[PlayerAction.rotateX] = -5
@@ -238,17 +239,17 @@ class MoveToActioner(AbstractActioner):
         self.target_pos = target_pos
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
-        if time() % 1 <0.2:
+        # if time() % 1 <0.2:
 
-            if int(time())%2 == 0:
-                # print("Right")
-                action_order_sheet[PlayerAction.MoveRight] = 1
-                return
+        #     if int(time())%2 == 0:
+        #         # print("Right")
+        #         action_order_sheet[PlayerAction.MoveRight] = 1
+        #         return
 
-            elif int(time())%2 == 1:
-                # print("Left")
-                action_order_sheet[PlayerAction.MoveLeft] = 1
-                return
+        #     elif int(time())%2 == 1:
+        #         # print("Left")
+        #         action_order_sheet[PlayerAction.MoveLeft] = 1
+        #         return
                 
             # elif int(time())%4 == 0:        
             #     print("Front")

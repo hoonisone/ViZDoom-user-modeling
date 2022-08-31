@@ -189,10 +189,10 @@ if __name__ == "__main__":
             map = game.get_state().automap_buffer[0]
             
 
-            if map is not None:
-                cv2.imshow('ViZDoom Automap Buffer', map)
+            # if map is not None:
+            #     cv2.imshow('ViZDoom Automap Buffer', map)
 
-            cv2.waitKey(1)
+            # cv2.waitKey(1)
 
         # # stateData = StateData2(game.get_state())
         # stateData = None
