@@ -216,7 +216,8 @@ class StateData2:
             return None
 
         # print("player_id: %s, player: %s, target: %s"%(str(self.get_player_id()), str(player_label), str(object_label)))
-        return (object_label.x + object_label.width/2) - (player_label.x+player_label.width/2)
+        return (object_label.x + object_label.width/2) - 1920/2
+        # return (object_label.x + object_label.width/2) - (player_label.x+player_label.width/2)
 
     def is_in_shotting_effective_zone(self, id):
 
@@ -224,7 +225,8 @@ class StateData2:
         if x_pixel_dist is None:
             return False
         # print(math.fabs(x_pixel_dist))
-        return math.fabs(x_pixel_dist) <= max(20, self.get_label(id).width/2) # 플레이어와 표적의 중심 좌표가 표적의 withd 보다 짧은가
+        print(math.fabs(x_pixel_dist), max(50, self.get_label(id).width))
+        return math.fabs(x_pixel_dist) <= max(50, self.get_label(id).width) # 플레이어와 표적의 중심 좌표가 표적의 withd 보다 짧은가
 
 
 def get_angle_from_player_to_direction(px, py, dx, dy): # player를 기준으로 (x, y)의 방향을 angle(0~359)로 반환

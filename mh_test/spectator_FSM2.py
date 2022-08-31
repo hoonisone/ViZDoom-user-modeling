@@ -125,6 +125,7 @@ if __name__ == "__main__":
     game.set_sectors_info_enabled(True)
     game.set_labels_buffer_enabled(True)
     game.set_automap_buffer_enabled(True)
+    game.set_depth_buffer_enabled(True)
 
     game.add_available_game_variable(vzd.GameVariable.POSITION_X)
     game.add_available_game_variable(vzd.GameVariable.POSITION_Y)
@@ -148,28 +149,50 @@ if __name__ == "__main__":
 
     aimActioner = AimActioner(game)
     attackActioner = AttackActioner(game)
-    moveActioner = [
+    moveActionerList = [
         MoveToSectionActioner(game, Section.Top),
         MoveToSectionActioner(game, Section.Right),
+        MoveToSectionActioner(game, Section.Center),
+        MoveToSectionActioner(game, Section.Right),
         MoveToSectionActioner(game, Section.Bottom),
+        MoveToSectionActioner(game, Section.Left),
+        MoveToSectionActioner(game, Section.Center),
         MoveToSectionActioner(game, Section.Left)
     ]
 
     while not game.is_episode_finished():   
+        stateData = StateData2(game.get_state())
+        # print(-stateData.get_object(stateData.get_player_id()).angle)
+        game.make_action(make_into_doom_action({PlayerAction.rotateX: stateData.get_object(stateData.get_player_id()).angle}))
 
+        
         aimActioner = AimActioner(game)
         attackActioner = AttackActioner(game)
         idx = 0
+        # i=0
         while not game.is_episode_finished():
+            # i+=1
+            # if i%50 == 0:
+                # print("%d, %d"%(stateData.get_object(stateData.get_player_id()).position_x, stateData.get_object(stateData.get_player_id()).position_y))
             stateData = StateData2(game.get_state())
+
+            
+
+
             action_order_sheet = aimActioner.make_action(stateData)
             action_order_sheet = attackActioner.make_action(stateData, action_order_sheet= action_order_sheet)
-            action_order_sheet = moveActioner[idx].make_action(stateData, action_order_sheet= action_order_sheet)
+            action_order_sheet = moveActionerList[idx].make_action(stateData, action_order_sheet= action_order_sheet)
             game.make_action(make_into_doom_action(action_order_sheet))
-            if moveActioner[idx].is_finished(stateData):
-                idx = (idx + 1)%4
+            if moveActionerList[idx].is_finished(stateData):
+                idx = (idx + 1)%len(moveActionerList)
 
+            map = game.get_state().automap_buffer[0]
+            
 
+            if map is not None:
+                cv2.imshow('ViZDoom Automap Buffer', map)
+
+            cv2.waitKey(1)
 
         # # stateData = StateData2(game.get_state())
         # stateData = None

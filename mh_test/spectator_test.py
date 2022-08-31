@@ -54,7 +54,7 @@ if __name__ == "__main__":
     game.set_screen_resolution(vzd.ScreenResolution.RES_1920X1080)
     # Enables spectator mode, so you can play. Sounds strange but it is the agent who is supposed to watch not you.
     game.set_window_visible(True)
-    # game.set_mode(vzd.Mode.SPECTATOR)
+    game.set_mode(vzd.Mode.SPECTATOR)
     
     game.init()
 

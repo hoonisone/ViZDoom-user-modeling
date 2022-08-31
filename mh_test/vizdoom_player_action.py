@@ -54,7 +54,7 @@ def make_empty_action_order_sheet(): # action 누적을 위한 자료구조
         PlayerAction.weapone3 : 0,
         PlayerAction.weapone4 : 0,
         PlayerAction.weapone5 : 0,
-        PlayerAction.weapone6 : 0,
+        PlayerAction.weapone6 : 1,
         PlayerAction.f : 0,
         PlayerAction.e : 0,
         PlayerAction.rotateX : 0,
@@ -122,23 +122,53 @@ class AimActioner(AbstractActioner):
         super().__init__(game)
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+
         target_id = stateData.get_closest_enemy_label_id()
+        # self.see_brightest()
         # print("target_id:", str(target_id))
+        
         if target_id is None:
             self.doridori(stateData, action_order_sheet)
             return
         dist = stateData.get_x_pixel_dist(target_id)
         if dist is None:
             return 
-        action_order_sheet[PlayerAction.rotateX] = 100 * dist/(1920/2)/2
 
+        if len(stateData.enemy_label_id_list) >= 3:
+            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(1920/2)/2 + math.sin(time()*5)*10
+        else:
+            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(1920/2)/2 + math.sin(time()*10)
+        
+
+
+    # def see_brightest(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    #     buffer = self.game.get_state().depth_buffer
+    #     l = []
+    #     for i in range(500, 1601, 10):
+    #         l.append(buffer[600][i])
+
+    #     print(sum(l)/len(l))
+
+    #     if sum(l)/len(l) <= 10:
+    #         dist = 500 + l.index(max(l))*100 - 1920/2
+    #         action_order_sheet[PlayerAction.rotateX] = 50 * dist/(1920/2)/2
+    #         return True
+        
+    #     return False
 
     def doridori(self, stateData: StateData2, action_order_sheet: PlayerAction):
-        v = math.sin(time()/3)
+        
+        # if self.see_brightest(stateData, action_order_sheet):
+        #     return 
+        
+        
+        v = math.sin(time())
+        action_order_sheet[PlayerAction.rotateX] = min(2, max(-3, v*4))
+        return
         if v > 0:
-            action_order_sheet[PlayerAction.rotateX] = -1
+            action_order_sheet[PlayerAction.rotateX] = -5
         else:
-            action_order_sheet[PlayerAction.rotateX] = 1
+            action_order_sheet[PlayerAction.rotateX] = 5
         
 
 
@@ -147,13 +177,19 @@ class AttackActioner(AbstractActioner):
         super().__init__(game)
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        if len(stateData.enemy_label_id_list) >= 3:
+            action_order_sheet[PlayerAction.Atack] = 1
+            return
+
         target_id = stateData.get_closest_enemy_label_id()
         if target_id is None:
             return
 
         if stateData.is_in_shotting_effective_zone(target_id):
+            print("True")
             action_order_sheet[PlayerAction.Atack] = 1
-
+            return
+        print("False")
 
 
 # class SmoothRotateTo(AbstractActioner):
@@ -202,6 +238,27 @@ class MoveToActioner(AbstractActioner):
         self.target_pos = target_pos
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        if time() % 1 <0.2:
+
+            if int(time())%2 == 0:
+                # print("Right")
+                action_order_sheet[PlayerAction.MoveRight] = 1
+                return
+
+            elif int(time())%2 == 1:
+                # print("Left")
+                action_order_sheet[PlayerAction.MoveLeft] = 1
+                return
+                
+            # elif int(time())%4 == 0:        
+            #     print("Front")
+            #     action_order_sheet[PlayerAction.MoveFront] = 1
+            #     return
+            # elif int(time())%4 == 3:
+            #     print("Back")
+            #     action_order_sheet[PlayerAction.MoveBack] = 1
+            #     return
+
         player = stateData.get_object(stateData.get_player_id())
         x = int(player.position_x)
         y = int(player.position_y)
@@ -209,7 +266,9 @@ class MoveToActioner(AbstractActioner):
         if self.map[(y,x)] < 10:
             return
             
-        # RotateTo(self.game, 0).do_all() # 각도를 0으로            
+        # RotateTo(self.game, 0).do_all() # 각도를 0으로        
+         
+            
         x_plus = (self.map[(y,x+1)] < self.map[(y,x)])
         x_minus = (self.map[(y,x-1)] < self.map[(y,x)]) and not x_plus 
 
@@ -218,6 +277,15 @@ class MoveToActioner(AbstractActioner):
 
         xd = 1 if x_plus else (-1 if x_minus else 0)
         yd = 1 if y_plus else (-1 if y_minus else 0)
+
+        min_height = 100000000
+        for _dy in range(-1, 2):
+            for _dx in range(-1, 2):
+                if self.map[(y+_dy,x+_dx)] < min_height:
+                    min_height = self.map[(y+_dy,x+_dx)]
+                    dx = _dx
+                    dy = _dy
+
         # destination_angle = self.get_angle_from_direction(xd, yd)
 
 
@@ -228,9 +296,9 @@ class MoveToActioner(AbstractActioner):
         player_angle = player.angle
         
         # player_angle = StateData(self.game.get_state()).player.object.angle/
-        
+        # print(direct_destination_angle, player_angle)
         relative_angle = ((direct_destination_angle-player_angle) + 360)%360 # 플레이어 기준에서 어느 방향으로 움직여야 하는가?
-        print(y, x, self.target_pos[0], self.target_pos[1])
+        # print(y, x, self.target_pos[0], self.target_pos[1])
         # print(destination_angle)
         # print(relative_angle)
         direction = self.get_direction_from_angle(relative_angle)
@@ -258,6 +326,34 @@ class MoveToActioner(AbstractActioner):
         action_order_sheet[PlayerAction.MoveRight] = right
         action_order_sheet[PlayerAction.MoveLeft] = left
 
+
+        map_pos = self.map.access_map.get_map_pos((x, y))
+        # print("************")
+        # print("Front: " + str(front) + ", right: " + str(right) )
+        # print("Back: " + str(back) + ", left: " + str(left) )
+
+
+        # print("************")
+        # for y in range(-1, 2):
+        #     for x in range(-1, 2):
+        #         print(self.map.map[map_pos[0]+y, map_pos[0]+x], end=", ")
+        #     print("")
+
+        
+        # print("************")
+        # print(str(dx) + ", " + str(dy)+"\n")
+
+        # for dy in range(-1, 2):
+        #     for dx in range(-1, 2):
+        #         print(self.map[y+dy, x+dx], end=", ")
+        #     print("\n")
+
+        
+
+        # print("************")
+
+                
+
         # self.game.make_action(make_into_doom_action({
         #     PlayerAction.Run: True,
         #     PlayerAction.MoveFront: front,
@@ -271,7 +367,6 @@ class MoveToActioner(AbstractActioner):
 
         # print("x:%3d, y:%3d, dx:%3d, dy:%3d"%(x, y, self.target_pos[0], self.target_pos[1]))
         # print(destination_angle- get_player(self.game).angle)
-        return False
 
 
     def get_angle_from_direction(self, x, y):
@@ -282,6 +377,11 @@ class MoveToActioner(AbstractActioner):
         for i, d in enumerate(direction_list):
             if cur_d == d:
                 return i * 45
+            
+        return 0
+
+        # print("d는?? " + str(cur_d))
+        # print(d == (1, -1))
         
     def get_direction_from_angle(self, angle): # 플레이어 기준으로 angle방향으로 이동하기 위한 (좌우, 앞뒤) 이동 여부를 반환
         direction_list = [(0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1)]
@@ -293,7 +393,7 @@ class MoveToActioner(AbstractActioner):
         player = stateData.get_object(stateData.get_player_id())
         x = int(player.position_x)
         y = int(player.position_y)
-        print(self.map[(y,x)])
+        # print(self.map[(y,x)])
         if self.map[(y,x)] < 10:
             return True
 
@@ -321,10 +421,10 @@ class MoveToSectionActioner(MoveToPositionActioner):
         if section == Section.Center:
             return (600, 600)
         if section == Section.Top:
-            return (600, 1200)
+            return (660, 1250)
         if section == Section.Bottom:
-            return (600, -100)
+            return (660, -150)
         if section == Section.Right:
-            return (1200, 600)
+            return (1250, 600)
         if section == Section.Left:
-            return (-100, 600)
+            return (-150, 600)

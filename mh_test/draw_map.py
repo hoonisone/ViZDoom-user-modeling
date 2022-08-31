@@ -6,20 +6,21 @@ import keyboard
 from PIL import Image
 import matplotlib.pyplot as plt
 
-def draw_wall(map, origin, x1, y1, x2, y2):
+
+def draw_wall(map, origin, x1, y1, x2, y2, v):
 
     if x1 == x2:
         x = int(origin[0]+x1)
         from_y = int(origin[1] + min(y1, y2))
         to_y   = int(origin[1] + max(y1, y2))
         for y in range(from_y, to_y+1):
-            map[y, x] = 0
+            map[y, x] = v
     else:
         y = int(origin[1]+y1)
         from_x = int(origin[0] + min(x1, x2))
         to_x =   int(origin[0] + max(x1, x2))
         for x in range(from_x, to_x+1):
-            map[y, x] = 0
+            map[y, x] = v
 
 
 def make_direction_map(access, target):
@@ -68,6 +69,13 @@ def get_map(state):
 
     return plt
 
+def spread_height(value_map, x, y, height, term, n): # (x, y)에서 주변 n개 칸 까지 max값에서 term씩 줄어드는 값을 더해준다.
+    for dy in range(max(0,-n), min(value_map.shape[0], n+1)):
+        for dx in range(max(0,-n), min(value_map.shape[1], n+1)):
+            dist = abs(dx) + abs(dy)
+            if dist <= n:
+                value_map[y+dy][x+dx] += height-dist*term
+
 class AccessMap:
 
     def __init__(self, game, adjust_pos = (500, 500), pooling = (8, 8)): # adjust_pos: 원점 좌표 => 음수인 좌표를 모두 양수로 만들기 위함
@@ -76,7 +84,7 @@ class AccessMap:
 
         # 맵 생성
         state = game.get_state()
-        map = np.ones(shape=(2000, 2000))*255            # game에서 맵의 크기를 확인하고 세팅하는 코드로 수정 필요
+        map = np.ones(shape=(2000, 2000))            # game에서 맵의 크기를 확인하고 세팅하는 코드로 수정 필요
         # 0: accessable, 1: unaccessable
 
 
@@ -84,7 +92,20 @@ class AccessMap:
         for s in state.sectors:
             for l in s.lines:
                 if l.is_blocking:
-                    draw_wall(map, self.adjust_pos, l.x1, l.y1, l.x2, l.y2)
+                    draw_wall(map, self.adjust_pos, l.x1, l.y1, l.x2, l.y2, 0)
+
+        # 벽 주변 미세 높이 값 저장 맵 생성
+
+        self.wall_around_height_map = np.zeros(shape=map.shape)
+        for y in range(map.shape[0]):
+            for x in range(map.shape[1]):
+                if map[y][x] == 0:
+                    pass
+                    #spread_height(self.wall_around_height_map, x, y, 100, 1, 50)
+
+        # pil_image=Image.fromarray(self.wall_around_height_map)
+        # pil_image.show()
+        
 
         # 축소 8x8 -> 1x1
         map = max_pooling(map)
@@ -150,7 +171,7 @@ class HeightMap: # map에서 높이 값을 표현(벽은 높이가 무한대라 
             x, y, l = work_list[0]
             
             work_list.pop(0)
-            if not ((0 <= x and x < self.map.shape[0]) and (0 <= y and y <self.map.shape[1])):
+            if not ((0 <= x and x < self.map.shape[1]) and (0 <= y and y <self.map.shape[0])):
                 continue
             elif access_map.map[y, x] == 0:
                 continue
@@ -163,6 +184,18 @@ class HeightMap: # map에서 높이 값을 표현(벽은 높이가 무한대라 
                 work_list.append((x, y+1, l+3))
                 work_list.append((x, y-1, l+3))
 
+        # 벽 키우기(두껍게)
+        # w = 2 # 두깨
+        # add_map = np.ones(shape=self.map.shape)
+        # for y in range(add_map.shape[0]):
+        #     for x in range(add_map.shape[1]): 
+        #         if access_map.map[y, x] == 0: # 벽인 경우
+        #             for a in range(-w, w+1, 1):
+        #                 for b in range(-w, w+1, 1):
+        #                     if  (0 <= y+a) and (y+a < add_map.shape[0]) and (0 <= x+b) and (x+b < add_map.shape[1]):
+        #                         add_map[y+a, x+b] += (10-abs(max(a, b)))*30
+        # self.map += add_map
+
     def __getitem__(self, pos):
         (x, y, dx, dy) = self.access_map.get_map_pos(pos)
         # print(x, y, dx, dy)
@@ -173,7 +206,7 @@ class HeightMap: # map에서 높이 값을 표현(벽은 높이가 무한대라 
         dx = dist_x*dx
         dy = dist_y*dy
 
-        return self.map[y, x] + dx + dy
+        return self.map[y, x] + dx + dy + self.access_map.wall_around_height_map[pos[1]][pos[0]]
 
     def show(self):
         pil_image=Image.fromarray(self.map)
