@@ -62,23 +62,23 @@ def OrganizeObjectInfor(objects):
 
 ###############################################
 
-action1 = make_action({
+action1 = make_into_doom_action({
     PlayerAction.Atack:False,
     PlayerAction.rotateX: 5
 })
 
-action2 = make_action({
+action2 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.rotateX: 5
 })
 
-action3 = make_action({
+action3 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.MoveFront:True,
     PlayerAction.rotateX: 3
 })
 
-action4 = make_action({
+action4 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.MoveFront:True,
     PlayerAction.rotateX: -3
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         game.advance_action() # 이거 있어야 조작 가능
         
         stateData = StateData2(state)
-        closest_enemy_label = stateData.get_closest_enemy_label()
+        closest_enemy_label = stateData.get_closest_enemy_label_id()
         if closest_enemy_label is not None:
             print(closest_enemy_label.x + closest_enemy_label.width/2, closest_enemy_label.y + closest_enemy_label.height/2)
 

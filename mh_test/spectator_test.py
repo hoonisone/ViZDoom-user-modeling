@@ -54,32 +54,38 @@ if __name__ == "__main__":
     game.set_screen_resolution(vzd.ScreenResolution.RES_1920X1080)
     # Enables spectator mode, so you can play. Sounds strange but it is the agent who is supposed to watch not you.
     game.set_window_visible(True)
-    game.set_mode(vzd.Mode.SPECTATOR)
+    # game.set_mode(vzd.Mode.SPECTATOR)
     
     game.init()
 
     game.new_episode()
-
        
+    aimActioner = AimActioner(game)
+    attackActioner = AttackActioner(game)
     while not game.is_episode_finished():
+        stateData = StateData2(game.get_state())
+        action_order_sheet = aimActioner.make_action(stateData)
+        action_order_sheet = attackActioner.make_action(stateData, action_order_sheet= action_order_sheet)
+        game.make_action(make_into_doom_action(action_order_sheet))
+        
 
-        a = 1
-        for i in range(1000000):
-            a += 2
-        # print(get_angle_from_player_to_direction(game, 500, 500))
+    #     a = 1
+    #     for i in range(1000000):
+    #         a += 2
+    #     # print(get_angle_from_player_to_direction(game, 500, 500))
 
-        # relative_angle = (-get_player(game).angle)+360)%360
-        # rx = 500-get_player(game).position_x
-        # ry = 500-get_player(game).position_y
-        # ra = ((get_angle_from_player_to_direction(game, 500, 500)-get_player(game).angle)+360)%360
-        # print("Game Player Angle: %d, Relative: %d, rx: %d, ry: %d"% (get_player(game).angle, ra, rx, ry))
+    #     # relative_angle = (-get_player(game).angle)+360)%360
+    #     # rx = 500-get_player(game).position_x
+    #     # ry = 500-get_player(game).position_y
+    #     # ra = ((get_angle_from_player_to_direction(game, 500, 500)-get_player(game).angle)+360)%360
+    #     # print("Game Player Angle: %d, Relative: %d, rx: %d, ry: %d"% (get_player(game).angle, ra, rx, ry))
 
-        a = get_player(game).angle
-        x = get_player(game).position_x
-        y = get_player(game).position_y
+    #     a = get_player(game).angle
+    #     x = get_player(game).position_x
+    #     y = get_player(game).position_y
 
-        print("a: %d, x: %d, y: %d"%(a, x, y))
-        game.advance_action() # 이거 있어야 조작 가능
+    #     print("a: %d, x: %d, y: %d"%(a, x, y))
+    #     game.advance_action() # 이거 있어야 조작 가능
         
         
 

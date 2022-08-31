@@ -6,13 +6,13 @@ from vizdoom_object_data import *
 
 class DeathmatchAction:
     def set_angle(stateData, angle):
-        action = make_action({
+        action = make_into_doom_action({
             PlayerAction.rotateX: stateData.player.object.angle-angle
         })
         return (action, True)
 
     def MoveTo(stateData, pos):
-        make_action({
+        make_into_doom_action({
             # PlayerAction.Atack:True,
             PlayerAction.MoveLeft: (map[y+1,x] < map[y,x]),
             PlayerAction.MoveRight: (map[y-1,x] < map[y,x]),
@@ -23,12 +23,12 @@ class DeathmatchAction:
 
 
 
-    def get_map(section)
-        if section == "Top":
-            make_direction_map(access, ((500+1200)//8, (500+500)//8))
-        else
+    # def get_map(section)
+    #     if section == "Top":
+    #         make_direction_map(access, ((500+1200)//8, (500+500)//8))
+    #     else
 
-class AbstractAction:
+class AbstractActioner:
     @ abstractmethod
     def do(self): # 한 스텝 수행 후 종료 여부 반환
         pass
@@ -38,19 +38,19 @@ class AbstractAction:
             if self.do():
                 break
 
-class RotateTo(AbstractAction):
+class RotateTo(AbstractActioner):
     def __init__(self, game, angle):
         self.game = game
         self.angle = angle
 
     def do(self):
-        self.game.make_action(make_action({
+        self.game.make_action(make_into_doom_action({
                 PlayerAction.rotateX: StateData(self.game.get_state()).player.object.angle-self.angle
         }))
         return True
 
 
-class MoveTo(AbstractAction):
+class MoveToActioner(AbstractActioner):
     
     def __init__(self, game, target_pos): 
         access_map = AccessMap(game.get_state())
@@ -72,7 +72,7 @@ class MoveTo(AbstractAction):
             front = (map[(y,x+1)] < map[(y,x)])
             back = (map[(y,x-1)] < map[(y,x)]) and not front
 
-            self.game.make_action(make_action({
+            self.game.make_action(make_into_doom_action({
                 PlayerAction.MoveFront: front,
                 PlayerAction.MoveBack: back,
                 PlayerAction.MoveRight: right,

@@ -9,6 +9,7 @@
 #####################################################################
 
 from argparse import ArgumentParser
+from gc import is_finalized
 from inspect import modulesbyfile
 from msilib.schema import MoveFile
 import os
@@ -17,6 +18,7 @@ from time import sleep
 from turtle import st
 from matplotlib.axis import Tick
 import vizdoom as vzd
+
 from PIL import Image
 from random import choice
 import keyboard
@@ -25,6 +27,7 @@ import numpy as np
 from vizdoom_object_data import *
 from vizdoom_player_action import * 
 import cv2
+
 
 from draw_map import *
 
@@ -68,23 +71,23 @@ def OrganizeObjectInfor(objects):
 
 ###############################################
 
-action1 = make_action({
+action1 = make_into_doom_action({
     PlayerAction.Atack:False,
     PlayerAction.rotateX: 5
 })
 
-action2 = make_action({
+action2 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.rotateX: 5
 })
 
-action3 = make_action({
+action3 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.MoveFront:True,
     PlayerAction.rotateX: 3
 })
 
-action4 = make_action({
+action4 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.MoveFront:True,
     PlayerAction.rotateX: -3
@@ -143,28 +146,62 @@ if __name__ == "__main__":
     # map.show()
 
 
+    aimActioner = AimActioner(game)
+    attackActioner = AttackActioner(game)
+    moveActioner = [
+        MoveToSectionActioner(game, Section.Top),
+        MoveToSectionActioner(game, Section.Right),
+        MoveToSectionActioner(game, Section.Bottom),
+        MoveToSectionActioner(game, Section.Left)
+    ]
 
     while not game.is_episode_finished():   
 
-        action = MoveToSection(game, Section.Top)
+        aimActioner = AimActioner(game)
+        attackActioner = AttackActioner(game)
+        idx = 0
         while not game.is_episode_finished():
-            if action.do():
-                break
+            stateData = StateData2(game.get_state())
+            action_order_sheet = aimActioner.make_action(stateData)
+            action_order_sheet = attackActioner.make_action(stateData, action_order_sheet= action_order_sheet)
+            action_order_sheet = moveActioner[idx].make_action(stateData, action_order_sheet= action_order_sheet)
+            game.make_action(make_into_doom_action(action_order_sheet))
+            if moveActioner[idx].is_finished(stateData):
+                idx = (idx + 1)%4
 
-        action = MoveToSection(game, Section.Bottom)
-        while not game.is_episode_finished():
-            if action.do():
-                break
 
-        action = MoveToSection(game, Section.Right)
-        while not game.is_episode_finished():
-            if action.do():
-                break
 
-        action = MoveToSection(game, Section.Left)
-        while not game.is_episode_finished():
-            if action.do():
-                break
+        # # stateData = StateData2(game.get_state())
+        # stateData = None
+        # actioner = MoveToSectionActioner(game, Section.Top)
+        # while not game.is_episode_finished():
+        #     if actioner.is_finished():
+        #         break
+        #     action_order_sheet = actioner.make_action(stateData)
+        #     game.make_action(make_into_doom_action(action_order_sheet))
+        #     print("A")
+
+        # print("B")
+        # actioner = MoveToSectionActioner(game, Section.Bottom)
+        # while not game.is_episode_finished():
+        #     if actioner.is_finished():
+        #         break
+        #     action_order_sheet = actioner.make_action(stateData)
+        #     game.make_action(make_into_doom_action(action_order_sheet))
+
+        # actioner = MoveToSectionActioner(game, Section.Right)
+        # while not game.is_episode_finished():
+        #     if actioner.is_finished():
+        #         break
+        #     action_order_sheet = actioner.make_action(stateData)
+        #     game.make_action(make_into_doom_action(action_order_sheet))
+
+        # actioner = MoveToSectionActioner(game, Section.Left)
+        # while not game.is_episode_finished():
+        #     if actioner.is_finished():
+        #         break
+        #     action_order_sheet = actioner.make_action(stateData)
+        #     game.make_action(make_into_doom_action(action_order_sheet))
 
 
         # if keyboard.is_pressed("Enter"):    

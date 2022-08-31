@@ -1,17 +1,22 @@
 
+from email.charset import add_alias
 from enum import IntEnum
 from abc import abstractmethod
 
 from multiprocessing.reduction import steal_handle
-import secrets
+from operator import le
 from stringprep import map_table_b2
 from telnetlib import SE
-from typing import overload
+from tkinter import N
+from typing import Annotated, overload
 from unittest import getTestCaseNames
 from vizdoom_player_action import * 
 from draw_map import *
 from vizdoom_object_data import *
 import math
+from time import time
+import vizdoom as vzd
+
 class PlayerAction(IntEnum):
     Atack = 0
     Run = 1
@@ -33,7 +38,30 @@ class PlayerAction(IntEnum):
     rotateY = 17
     rotateX = 18
 
-def make_action(action_dict):
+def make_empty_action_order_sheet(): # action 누적을 위한 자료구조
+    return {
+        PlayerAction.Atack : 0,
+        PlayerAction.Run : 0,
+        PlayerAction.b : 0,
+        PlayerAction.MoveBack : 0,
+        PlayerAction.MoveLeft : 0,
+        PlayerAction.MoveBack : 0,
+        PlayerAction.MoveFront : 0,
+        PlayerAction.TurnRight : 0,
+        PlayerAction.TurnLeft : 0,
+        PlayerAction.weapone1 : 0,
+        PlayerAction.weapone2 : 0,
+        PlayerAction.weapone3 : 0,
+        PlayerAction.weapone4 : 0,
+        PlayerAction.weapone5 : 0,
+        PlayerAction.weapone6 : 0,
+        PlayerAction.f : 0,
+        PlayerAction.e : 0,
+        PlayerAction.rotateX : 0,
+        PlayerAction.rotateY : 0
+    }
+
+def make_into_doom_action(action_dict): # action_order를 doom 전용 action으로 표현
     action = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     for key in action_dict.keys():
         action[key] = action_dict[key]
@@ -66,54 +94,95 @@ def make_action(action_dict):
     #         make_direction_map(access, ((500+1200)//8, (500+500)//8))
     #     else
 
-class AbstractAction:
+class AbstractActioner:
+
+    def __init__(self, game:vzd.DoomGame):
+        self.game = game
+
+    def make_action(self, stateData:StateData2 = None, action_order_sheet:dict = None): # Actioner가 담당하는 동작의 한 step에 해당하는 action을 생성한다.
+        if stateData is None:
+            stateData = StateData2(self.game.get_state())
+
+        if action_order_sheet is None:
+            action_order_sheet = make_empty_action_order_sheet()
+        
+        self.add_action(stateData, action_order_sheet)
+        return action_order_sheet
+
     @ abstractmethod
-    def do(self): # 한 스텝 수행 후 종료 여부 반환
+    def add_action(self, stateData:StateData2, action_order_sheet:PlayerAction): # 특정 액션을 추가하는 기능을 상속 객체가 정의해야 한다.
         pass
 
-    def do_all(self) -> bool: # 액션의 전체 과정을 수행
-        while True:
-            if self.do():
-                break
-
-class RotateTo(AbstractAction):
-    def __init__(self, game, angle):
-        self.game = game
-        self.angle = angle
-
-    def do(self):
-        self.game.make_action(make_action({
-                PlayerAction.rotateX: StateData(self.game.get_state()).player.object.angle-self.angle
-        }))
-        return True
-
-class SmoothRotateTo(AbstractAction):
-    def __init__(self, game, angle):
-        self.game = game
-        self.angle = angle
-
-    def do(self):
-        player_angle = get_player(self.game).angle
-        
-        if abs(player_angle - self.angle) < 5: # 원하는 각도와 별 차이 없으면
-            return True
-
-        player_angle = (player_angle%360)-180
-        target_angle = (self.angle%360)-180
-
-        angle_dist = target_angle - player_angle
-        
-        if angle_dist < 0: # 반시계 방향으로 돌 것인가?
-            how_to_rotate = -min(3, abs(angle_dist))
-        else:
-            how_to_rotate = min(3, abs(angle_dist))
-
-        self.game.make_action(make_action({
-                PlayerAction.rotateX: -how_to_rotate
-        }))
-
-
+    @ abstractmethod
+    def is_finished(self, stateData: StateData2) -> bool:
         return False
+       
+class AimActioner(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame):
+        super().__init__(game)
+
+    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        target_id = stateData.get_closest_enemy_label_id()
+        # print("target_id:", str(target_id))
+        if target_id is None:
+            self.doridori(stateData, action_order_sheet)
+            return
+        dist = stateData.get_x_pixel_dist(target_id)
+        if dist is None:
+            return 
+        action_order_sheet[PlayerAction.rotateX] = 100 * dist/(1920/2)/2
+
+
+    def doridori(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        v = math.sin(time()/3)
+        if v > 0:
+            action_order_sheet[PlayerAction.rotateX] = -1
+        else:
+            action_order_sheet[PlayerAction.rotateX] = 1
+        
+
+
+class AttackActioner(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame):
+        super().__init__(game)
+
+    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        target_id = stateData.get_closest_enemy_label_id()
+        if target_id is None:
+            return
+
+        if stateData.is_in_shotting_effective_zone(target_id):
+            action_order_sheet[PlayerAction.Atack] = 1
+
+
+
+# class SmoothRotateTo(AbstractActioner):
+#     def __init__(self, game, angle):
+#         self.game = game
+#         self.angle = angle
+
+#     def add_action(self):
+#         player_angle = get_player(self.game).angle
+        
+#         if abs(player_angle - self.angle) < 5: # 원하는 각도와 별 차이 없으면
+#             return True
+
+#         player_angle = (player_angle%360)-180
+#         target_angle = (self.angle%360)-180
+
+#         angle_dist = target_angle - player_angle
+        
+#         if angle_dist < 0: # 반시계 방향으로 돌 것인가?
+#             how_to_rotate = -min(3, abs(angle_dist))
+#         else:
+#             how_to_rotate = min(3, abs(angle_dist))
+
+#         self.game.make_action(make_into_doom_action({
+#                 PlayerAction.rotateX: -how_to_rotate
+#         }))
+
+
+#         return False
 
 class Section(IntEnum):
     Center = 0,
@@ -123,22 +192,22 @@ class Section(IntEnum):
     Bottom = 4
 
 
-class MoveTo(AbstractAction):
+class MoveToActioner(AbstractActioner):
     
     access_map = None
 
-    def __init__(self, game, directionMap, target_pos): 
-        self.game = game
+    def __init__(self, game: vzd.DoomGame, directionMap, target_pos): 
+        super().__init__(game)
         self.map = directionMap
         self.target_pos = target_pos
 
-    def do(self) -> bool:
-        player = get_player(self.game)
+    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        player = stateData.get_object(stateData.get_player_id())
         x = int(player.position_x)
         y = int(player.position_y)
 
         if self.map[(y,x)] < 10:
-            return True        
+            return
             
         # RotateTo(self.game, 0).do_all() # 각도를 0으로            
         x_plus = (self.map[(y,x+1)] < self.map[(y,x)])
@@ -161,7 +230,7 @@ class MoveTo(AbstractAction):
         # player_angle = StateData(self.game.get_state()).player.object.angle/
         
         relative_angle = ((direct_destination_angle-player_angle) + 360)%360 # 플레이어 기준에서 어느 방향으로 움직여야 하는가?
-        # print(x, y, self.target_pos[0], self.target_pos[1], relative_angle)/
+        print(y, x, self.target_pos[0], self.target_pos[1])
         # print(destination_angle)
         # print(relative_angle)
         direction = self.get_direction_from_angle(relative_angle)
@@ -177,26 +246,33 @@ class MoveTo(AbstractAction):
         # print(self.get_angle_from_direction())
 
 
-        angle = 0
-        if keyboard.is_pressed("a"):    
-            angle = -5
-        elif keyboard.is_pressed("d"):
-            angle = 5
+        # angle = 0
+        # if keyboard.is_pressed("a"):    
+        #     angle = -5
+        # elif keyboard.is_pressed("d"):
+        #     angle = 5
 
-        self.game.make_action(make_action({
-            PlayerAction.Run: True,
-            PlayerAction.MoveFront: front,
-            PlayerAction.MoveBack: back,
-            PlayerAction.MoveRight: right,
-            PlayerAction.MoveLeft: left,
-            PlayerAction.rotateX: angle
-        }))
+        action_order_sheet[PlayerAction.Run] = True
+        action_order_sheet[PlayerAction.MoveFront] = front
+        action_order_sheet[PlayerAction.MoveBack] = back
+        action_order_sheet[PlayerAction.MoveRight] = right
+        action_order_sheet[PlayerAction.MoveLeft] = left
+
+        # self.game.make_action(make_into_doom_action({
+        #     PlayerAction.Run: True,
+        #     PlayerAction.MoveFront: front,
+        #     PlayerAction.MoveBack: back,
+        #     PlayerAction.MoveRight: right,
+        #     PlayerAction.MoveLeft: left,
+        #     # PlayerAction.rotateX: angle
+        # }))
 
         # SmoothRotateTo(self.game, destination_angle).do()/
 
-        print("x:%3d, y:%3d, dx:%3d, dy:%3d"%(x, y, self.target_pos[0], self.target_pos[1]))
+        # print("x:%3d, y:%3d, dx:%3d, dy:%3d"%(x, y, self.target_pos[0], self.target_pos[1]))
         # print(destination_angle- get_player(self.game).angle)
         return False
+
 
     def get_angle_from_direction(self, x, y):
         # x, y방향으로 움직이는 여부를 가지고 이동 방향을 구한다.
@@ -213,23 +289,32 @@ class MoveTo(AbstractAction):
         return direction_list[angle]
 
 
-class MoveToSection(AbstractAction):
+    def is_finished(self, stateData: StateData2) -> bool:
+        player = stateData.get_object(stateData.get_player_id())
+        x = int(player.position_x)
+        y = int(player.position_y)
+        print(self.map[(y,x)])
+        if self.map[(y,x)] < 10:
+            return True
 
-    map_dict = {}
+class MoveToPositionActioner(MoveToActioner):
 
+    access_map = None
+    direction_map_dict = {}
+
+    def __init__(self, game: vzd.DoomGame, position ):
+
+        if MoveToPositionActioner.access_map is None:
+            MoveToPositionActioner.access_map = AccessMap(game)
+
+        if position not in MoveToPositionActioner.direction_map_dict:
+            MoveToPositionActioner.direction_map_dict[position] = HeightMap(MoveToPositionActioner.access_map, position)
+
+        super().__init__(game, MoveToPositionActioner.direction_map_dict[position], position)
+
+class MoveToSectionActioner(MoveToPositionActioner):
     def __init__(self, game, section: Section):
-        
-        access_map = AccessMap(game)
-        self.target_pos = MoveToSection.get_target_pos(section)
-        direction_map = MoveToSection.get_direction_map(access_map, self.target_pos)
-        self.moveTo = MoveTo(game, direction_map, self.target_pos)
-        
-
-    @staticmethod
-    def get_direction_map(accessMap, target_pos):
-        if target_pos not in MoveToSection.map_dict:    
-            MoveToSection.map_dict[target_pos] = HeightMap(accessMap, target_pos)
-        return MoveToSection.map_dict[target_pos]
+        super().__init__(game, MoveToSectionActioner.get_target_pos(section))
 
     @staticmethod
     def get_target_pos(section): # (x, y)
@@ -243,9 +328,3 @@ class MoveToSection(AbstractAction):
             return (1200, 600)
         if section == Section.Left:
             return (-100, 600)
-
-    def do(self):
-        
-        return self.moveTo.do()
-
-

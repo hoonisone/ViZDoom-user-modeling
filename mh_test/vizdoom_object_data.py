@@ -103,52 +103,52 @@ class StateData2:
 
     def __init__(self, state):
         self.state = state
-        self.player = None
-        self.enemies = None
-        self.closest_enomy = None
-        self.id_object_dict = None
-        self.enemy_labels = None
-        self.closest_enemy_label = None
+        self.player_id = None
+        self.enemy_id_list = None
+        self.closest_enomy_object_id = None
+        self.id_object_dict = None # id 와 object 쌍 저장
+        self.id_label_dict = None # id 와 label 쌍 저장
+        self.enemy_label_id_list = None
+        self.closest_enemy_label_id = None
 
-    def get_player(self):
-        if self.player == None:
+    def get_player_id(self):
+        if self.player_id == None:
             for object in self.state.objects:
                 if object.name == "DoomPlayer":
-                    self.player = object
-                    break     
-        
-        return self.player
+                    self.player_id = object.id
+                    break
+        return self.player_id
     
-    def is_enemy(self, object): # object가 적인지 판단.
-        return object.name in enemy_name_list
+    def is_enemy(self, id): # object가 적인지 판단.
+        return self.get_object(id).name in enemy_name_list
 
-    def get_enemies(self): # 존재하는 모든 적 OBJECT를 담은 리스트 반환
-        if self.enemies == None:
-            enemies= []
+    def get_enemy_id_list(self): # 존재하는 모든 적 object의 id 리스트 반환
+        if self.enemy_id_list == None:
+            enemy_id_list= []
             for object in self.state.objects:
-                if self.is_enemy(object):
-                    enemies.append(object)
+                if self.is_enemy(object.id):
+                    enemy_id_list.append(object.id)
 
-            self.enemies = enemies
+            self.enemy_id_list = enemy_id_list
 
-        return self.enemies
+        return self.enemy_id_list
 
-
-    def get_closest_enomy(self):
-        if self.closest_enomy == None:
+    def get_closest_enemy_object_id(self):
+        if self.closest_enomy_object_id == None:
             min_dist = 10000000
-            min_enemy = None
-            for object in self.get_enemies():
-                dist = self.get_dist_from_player(object)
+            min_enemy_id = None
+            for id in self.get_enemy_id_list():
+                dist = self.get_dist_from_player(id)
                 if dist < min_dist:
-                    min_enemy = object
+                    min_enemy_id = id
                     min_dist = dist
-            self.closest_enomy = min_enemy
+            self.closest_enomy_object_id = min_enemy_id
         
-        return self.closest_enomy
+        return self.closest_enomy_object_id
                 
-    def get_dist_from_player(self, object):
-        player = self.get_player()
+    def get_dist_from_player(self, id):
+        player = self.get_object(self.get_player_id())
+        object = self.get_object(id)
         player_pos = (player.position_x, player.position_y)
         object_pos = (object.position_x, object.position_y)
         return dist(player_pos, object_pos)
@@ -167,38 +167,65 @@ class StateData2:
 
         return self.id_object_dict
 
-    def get_enemy_labels(self):
+    def get_id_label_dict(self):
+        if self.id_label_dict == None:
+            id_label_dict = {}
+            for object in self.state.labels:
+                id_label_dict[object.object_id] = object
+            self.id_label_dict = id_label_dict
+
+        return self.id_label_dict
+
+    def get_object(self, id):
         id_object_dict = self.get_id_object_dict()
-        if self.enemy_labels == None:
-            enemy_labels = []
+        return id_object_dict[id] if id in id_object_dict else None
+
+    def get_label(self, id):
+        id_label_dict = self.get_id_label_dict()
+        return id_label_dict[id] if id in id_label_dict else None
+
+    def get_enemy_label_id_list(self):
+        if self.enemy_label_id_list == None:
+            enemy_label_id_list = []
             for label in self.state.labels:
-                if self.is_enemy(id_object_dict[label.object_id]):
-                    enemy_labels.append(label)
-            self.enemy_labels = enemy_labels
+                if self.is_enemy(label.object_id):
+                    enemy_label_id_list.append(label.object_id)
+            self.enemy_label_id_list = enemy_label_id_list
 
-        return self.enemy_labels
+        return self.enemy_label_id_list
 
-    def get_closest_enemy_label(self):
-        if self.closest_enemy_label is None:
+    def get_closest_enemy_label_id(self):
+        if self.closest_enemy_label_id is None:
             min_dist = 1000000000
-            min_enemy_label = None
-            for enemy_label in self.get_enemy_labels():
-                object = self.get_id_object_dict()[enemy_label.object_id]
-                dist = self.get_dist_from_player(object)
+            min_enemy_label_id = None
+            for enemy_label_id in self.get_enemy_label_id_list():
+                dist = self.get_dist_from_player(enemy_label_id)
                 if dist < min_dist:
                     min_dist = dist
-                    min_enemy_label = enemy_label
-            self.closest_enemy_label = min_enemy_label
-        return self.closest_enemy_label
+                    min_enemy_label_id = enemy_label_id
+            self.closest_enemy_label_id = min_enemy_label_id
+        return self.closest_enemy_label_id
 
+    def get_x_pixel_dist(self, id): # 화면 상에서 object와 플레이어의 중심좌표 간의 거리
+        object_label = self.get_label(id)
+        player_label = self.get_label(self.get_player_id())
+        if object_label is None:
+            return None
 
+        if player_label is None:
+            return None
 
-def get_player(game):
-    for obj in game.get_state().objects:
-        if obj.name == "DoomPlayer":
-            return obj
+        # print("player_id: %s, player: %s, target: %s"%(str(self.get_player_id()), str(player_label), str(object_label)))
+        return (object_label.x + object_label.width/2) - (player_label.x+player_label.width/2)
 
-    return None
+    def is_in_shotting_effective_zone(self, id):
+
+        x_pixel_dist = self.get_x_pixel_dist(id)
+        if x_pixel_dist is None:
+            return False
+        # print(math.fabs(x_pixel_dist))
+        return math.fabs(x_pixel_dist) <= max(20, self.get_label(id).width/2) # 플레이어와 표적의 중심 좌표가 표적의 withd 보다 짧은가
+
 
 def get_angle_from_player_to_direction(px, py, dx, dy): # player를 기준으로 (x, y)의 방향을 angle(0~359)로 반환
 

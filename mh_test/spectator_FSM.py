@@ -61,23 +61,23 @@ def OrganizeObjectInfor(objects):
 
 ###############################################
 
-action1 = make_action({
+action1 = make_into_doom_action({
     PlayerAction.Atack:False,
     PlayerAction.rotateX: 5
 })
 
-action2 = make_action({
+action2 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.rotateX: 5
 })
 
-action3 = make_action({
+action3 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.MoveFront:True,
     PlayerAction.rotateX: 3
 })
 
-action4 = make_action({
+action4 = make_into_doom_action({
     PlayerAction.Atack:True,
     PlayerAction.MoveFront:True,
     PlayerAction.rotateX: -3
@@ -131,9 +131,6 @@ if __name__ == "__main__":
         game.advance_action() # 이거 있어야 조작 가능
         stateData = StateData(state)        
 
-
-
-
         objects = stateData.get_object_date_list(visible=True)
         objects = extract_enemy(objects)
         target = get_closest_object(objects)
@@ -144,7 +141,7 @@ if __name__ == "__main__":
         else:
             print("Target: %s"% target.name)
             print(55 * get_pos_x(target, stateData.player)/(1920/2))
-            game.make_action(make_action({
+            game.make_action(make_into_doom_action({
                 PlayerAction.Atack:True,
                 # PlayerAction.MoveFront:True,
                 PlayerAction.rotateX: 55 * get_pos_x(target, stateData.player)/(1920/2)/2,
