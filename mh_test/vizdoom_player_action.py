@@ -164,12 +164,12 @@ class AimActioner(AbstractActioner):
         
         v = math.sin(time()/0.5)
         # action_order_sheet[PlayerAction.rotateX] = min(2, max(-3, 1+v*4))
-        action_order_sheet[PlayerAction.rotateX] = 3
-        return
+        # action_order_sheet[PlayerAction.rotateX] = 3
+        
         if v > 0:
-            action_order_sheet[PlayerAction.rotateX] = -5
+            action_order_sheet[PlayerAction.rotateX] = -v
         else:
-            action_order_sheet[PlayerAction.rotateX] = 5
+            action_order_sheet[PlayerAction.rotateX] = v
         
 
 
