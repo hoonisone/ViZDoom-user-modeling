@@ -14,8 +14,12 @@ from time import sleep
 import vizdoom as vzd
 import keyboard
 import json
+import time
 from vizdoom_log_util import *
-DEFAULT_CONFIG = os.path.join(vzd.scenarios_path, "deathmatch.cfg")
+import numpy as np
+
+# DEFAULT_CONFIG = os.path.join(vzd.scenarios_path, "deathmatch.cfg")
+DEFAULT_CONFIG = os.path.join("../scenarios/", "deathmatch.cfg")
 
 if __name__ == "__main__":
     parser = ArgumentParser("ViZDoom example showing how to use SPECTATOR mode.")
@@ -50,20 +54,36 @@ if __name__ == "__main__":
 
 
     game.init()
-
+    heads = ['time', 'timestamp', 'ATTACK', 'SPEED', 'STRAFE', 'MOVE_RIGHT', 'MOVE_LEFT', 'MOVE_BACKWARD', 'MOVE_FORWARD', 'TURN_RIGHT', 'TURN_LEFT', 'USE', 'SELECT_WEAPON1', 'SELECT_WEAPON2', 'SELECT_WEAPON3', 'SELECT_WEAPON4', 'SELECT_WEAPON5', 'SELECT_WEAPON6', 'SELECT_NEXT_WEAPON', 'SELECT_PREV_WEAPON', 'LOOK_UP_DOWN_DELTA', 'TURN_LEFT_RIGHT_DELTA', 'MOVE_LEFT_RIGHT_DELTA', 'KILLCOUNT', 'HEALTH', 'ARMOR', 'SELECTED_WEAPON', 'SELECTED_WEAPON_AMMO']
 
 
     game.new_episode()
 
     log_data = []
     image = []
+
+    start_time = time.time()
+
     while not game.is_episode_finished():
         state = game.get_state()
-        # print(type(state.objects[1]))
-        # s = json.dumps(state.objects[1])
-        
-        log_data.append(get_state_log(state))
+
+        last_action = game.get_last_action()
+        reward = game.get_last_reward()
+        variables = state.game_variables
+        now = time.time()
+
+        elp_time = now - start_time
+        var = np.concatenate(([now], [elp_time], last_action, variables), axis=0)
+        basic = {}
+        for i, name in enumerate(heads):
+            basic[name] = var[i]
+
         # image.append(state.screen_buffer)
+
+        state_data = get_state_log(state)
+        state_data["basic"] = basic
+        log_data.append(state_data)
+
         game.advance_action()
 
 
@@ -72,7 +92,7 @@ if __name__ == "__main__":
             break
         
     log_data = json.dumps(log_data)
-    with open("log.txt", "w") as f:
+    with open("log.json", "w") as f:
         f.write(log_data)
     
     print("Episode finished!")

@@ -9,6 +9,7 @@
 #####################################################################
 
 from argparse import ArgumentParser
+import enum
 import os
 from time import sleep
 import vizdoom as vzd
@@ -16,7 +17,7 @@ import pandas as pd
 import time
 import numpy as np
 
-DEFAULT_CONFIG = os.path.join(vzd.scenarios_path, "deathmatch.cfg")
+DEFAULT_CONFIG = os.path.join("../scenarios/", "deathmatch.cfg")
 
 if __name__ == "__main__":
     parser = ArgumentParser("ViZDoom example showing how to use SPECTATOR mode.")
@@ -43,6 +44,7 @@ if __name__ == "__main__":
     print('args config :',args.config)
 
     game.load_config(args.config)
+
     filepath='../../'
     heads = ['time', 'timestamp', 'ATTACK', 'SPEED', 'STRAFE', 'MOVE_RIGHT', 'MOVE_LEFT', 'MOVE_BACKWARD', 'MOVE_FORWARD', 'TURN_RIGHT', 'TURN_LEFT', 'USE', 'SELECT_WEAPON1', 'SELECT_WEAPON2', 'SELECT_WEAPON3', 'SELECT_WEAPON4', 'SELECT_WEAPON5', 'SELECT_WEAPON6', 'SELECT_NEXT_WEAPON', 'SELECT_PREV_WEAPON', 'LOOK_UP_DOWN_DELTA', 'TURN_LEFT_RIGHT_DELTA', 'MOVE_LEFT_RIGHT_DELTA', 'KILLCOUNT', 'HEALTH', 'ARMOR', 'SELECTED_WEAPON', 'SELECTED_WEAPON_AMMO']
     # Enables freelook in engine
@@ -75,6 +77,20 @@ if __name__ == "__main__":
             variables = state.game_variables
             elp_time = now - start_time
             var = np.concatenate(([now], [elp_time], last_action, variables), axis=0)
+
+            var
+
+            basic = {}
+            for i, name in enumerate(heads):
+                basic[name] = var[i]
+
+            print(basic)
+
+            # print(now)
+            # print(elp_time)
+            # print(last_action)
+            # print(variables)
+
             new_df = pd.DataFrame([var], columns=heads)
             
             data = pd.concat([data, new_df], ignore_index=True)

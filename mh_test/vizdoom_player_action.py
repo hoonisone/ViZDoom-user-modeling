@@ -43,7 +43,7 @@ def make_empty_action_order_sheet(): # action 누적을 위한 자료구조
         PlayerAction.Atack : 0,
         PlayerAction.Run : 0,
         PlayerAction.b : 0,
-        PlayerAction.MoveBack : 0,
+        PlayerAction.MoveRight : 0,
         PlayerAction.MoveLeft : 0,
         PlayerAction.MoveBack : 0,
         PlayerAction.MoveFront : 0,
