@@ -11,7 +11,8 @@ import vizdoom as vzd
 game = vzd.DoomGame()
 
 # Use CIG example config or your own.
-game.load_config(os.path.join(vzd.scenarios_path, "cig.cfg"))
+# game.load_config(os.path.join(vzd.scenarios_path, "cig.cfg"))
+game.load_config(os.path.join("./scenarios", "deathmatch.cfg"))
 
 game.set_doom_map("map01")  # Limited deathmatch.
 #game.set_doom_map("map02")  # Full deathmatch.
@@ -21,6 +22,8 @@ game.set_doom_map("map01")  # Limited deathmatch.
 game.add_game_args("-host 1 -deathmatch +timelimit 10.0 "
                    "+sv_forcerespawn 1 +sv_noautoaim 1 +sv_respawnprotect 1 +sv_spawnfarthest 1 +sv_nocrouch 1 "
                    "+viz_respawn_delay 10 +viz_nocheat 1")
+
+# game.add_game_args("-join 127.0.0.1 -port 5029")/
 
 # Bots are loaded from file, that by default is bots.cfg located in the same dir as ViZDoom exe
 # Other location of bots configuration can be specified by passing this argument

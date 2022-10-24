@@ -12,7 +12,10 @@ import vizdoom as vzd
 game = vzd.DoomGame()
 
 # Use CIG example config or your own.
-game.load_config(os.path.join(vzd.scenarios_path, "cig.cfg"))
+# game.load_config(os.path.join(vzd.scenarios_path, "cig.cfg"))
+# game.load_config(os.path.join("../scenarios", "cig.cfg"))
+game.load_config(os.path.join("./scenarios", "deathmatch.cfg"))
+# game.load_config(os.path.join("./scenarios", "deathmatch.cfg"))
 # game.load_config(os.path.join(vzd.scenarios_path, "deathmatch.cfg"))
 # game.load_config(os.path.join("../scenarios/", "deathmatch.cfg"))
 

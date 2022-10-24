@@ -41,7 +41,7 @@ game.add_game_args("+name Host +colorset 0")
 
 # During the competition, async mode will be forced for all agents.
 #game.set_mode(vzd.Mode.PLAYER)
-game.set_mode(vzd.Mode.ASYNC_PLAYER)
+game.set_mode(vzd.Mode.ASYNC_SPECTATOR)
 
 #game.set_window_visible(False)
 
@@ -59,7 +59,9 @@ while not game.is_episode_finished():
     # Analyze the state.
 
     # Make your action.
-    game.make_action(choice(actions))
+    # game.make_action(choice(actions))
+    game.make_action([])
+    game.advance_action() # 이거 있어야 조작 가능
 
     # Check if player is dead
     if game.is_player_dead():
