@@ -5,7 +5,8 @@ class Agent:
     def __init__(self, game):
         self.game = game
         # self.aimActioner = AimActioner(game)
-        self.aimActioner = PosFixationActioner(game, (300, 300))
+        # self.aimActioner = PosFixationActioner(game, (300, 300))
+        self.aimActioner = AimActioner(game)
         self.attackActioner = AttackActioner(game)
         self.moveActioner = RepetitiveMoveActioner(game)
         self.weaponChangeActioner = WeaponChangeActioner(game)

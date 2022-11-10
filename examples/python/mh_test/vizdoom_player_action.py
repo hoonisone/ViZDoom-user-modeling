@@ -130,82 +130,39 @@ class AbstractActioner:
             action[key] = action_dict[key]
         return action
 
-class AimActioner(AbstractActioner):
+class EnomyAimActioner(AbstractActioner):
+    # 보이는 가장 가까운 적을 응시
     def __init__(self, game: vzd.DoomGame):
         super().__init__(game)
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
-
         target_id = stateData.get_closest_enemy_label_id()
-        # self.see_brightest()
-        # print("target_id:", str(target_id))
-        
         if target_id is None:
-            # self.doridori(stateData, action_order_sheet)
-            # self.only_turn(stateData, action_order_sheet)
-            self.see_center(stateData, action_order_sheet)
             return
+
         dist = stateData.get_x_pixel_dist(target_id)
         if dist is None:
             return 
 
         if len(stateData.enemy_label_id_list) >= 4:
-            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(self.game.get_screen_width()/2)/2# + math.sin(time()*5)*10
+            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(self.game.get_screen_width()/2)/2 + math.sin(time()*5)*10
         else:
-            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(self.game.get_screen_width()/2)/2# + math.sin(time()*10)
-        
-    def doridori(self, stateData: StateData2, action_order_sheet: PlayerAction):
-        
-        # if self.see_brightest(stateData, action_order_sheet):
-        #     return 
-        speed = 1
-        angle = 5
-        
-        v = angle*math.sin(time()*speed)
-        # action_order_sheet[PlayerAction.rotateX] = min(2, max(-3, 1+v*4))
-        # # action_order_sheet[PlayerAction.rotateX] = 3
-        
-        action_order_sheet[PlayerAction.rotateX] = v
-    
-    def only_turn(self, stateData: StateData2, action_order_sheet: PlayerAction):
-        speed = 10
-        action_order_sheet[PlayerAction.rotateX] = speed
-    
-    def see_center(self, stateData: StateData2, action_order_sheet: PlayerAction):
-        (x, y) = stateData.get_palyer_location()
+            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(self.game.get_screen_width()/2)/2 + math.sin(time()*10)
 
-        r_x, r_y = 500-x, 500-y
-        angle = stateData.get_player().angle
-        
-        theta = math.atan((r_y)/(r_x))
-        
-        if (r_x<0):
-            theta += math.pi
-
-        theta = theta*180/math.pi
-        if theta < 0:
-            theta += 360
-
-        rotate = theta - angle        
-
-        print("pos = ", int(x), int(y), "theta = ", theta, "rotate: ", rotate, "cur : ", angle)
-
-        # print("pos = ", x, y, "theta = ", theta, "cur : ", angle)
-        action_order_sheet[PlayerAction.rotateX] = -rotate/2
-
-class RandomPosFixationAction(AbstractActioner):
-    def __init__(self, game: vzd.DoomGame, target_pos_list:list, change_p):
+class AimActioner(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame):
         super().__init__(game)
-        self.target_pos_list = target_pos_list
-        self.change_sub_actioner()
+        self.randomPosFixationActioner = RandomPosFixationAction_V1(game)
+        self.enomyAimActioner = EnomyAimActioner(game)
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
-        if random.random() < self.change_p:
-            self.change_sub_actioner()
-        self.sub_actioner.add_action(stateData, action_order_sheet)    
 
-    def change_sub_actioner(self):
-        self.sub_actioner = self.target_pos_list[random.randrange(len(self.target_pos_list))]
+        target_id = stateData.get_closest_enemy_label_id()
+        
+        if target_id is None:
+            self.randomPosFixationActioner.add_action(stateData, action_order_sheet)
+        else:
+            self.enomyAimActioner.add_action(stateData, action_order_sheet)        
 
 class PosFixationActioner(AbstractActioner):
     def __init__(self, game: vzd.DoomGame, target_pos:tuple):
@@ -229,10 +186,41 @@ class PosFixationActioner(AbstractActioner):
 
         rotate = theta - angle        
 
-        print("pos = ", int(x), int(y), "theta = ", theta, "rotate: ", rotate, "cur : ", angle)
+        # print("pos = ", int(x), int(y), "theta = ", theta, "rotate: ", rotate, "cur : ", angle)
 
         # print("pos = ", x, y, "theta = ", theta, "cur : ", angle)
-        action_order_sheet[PlayerAction.rotateX] = -rotate/2
+        action_order_sheet[PlayerAction.rotateX] = -rotate/10
+
+class RandomPosFixationAction(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame, target_pos_list:list, change_p:float):
+        super().__init__(game)
+        self.target_pos_list = target_pos_list
+        self.change_p = change_p
+        self.change_sub_actioner()
+
+    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        if random.random() < self.change_p:
+            self.change_sub_actioner()
+        self.sub_actioner.add_action(stateData, action_order_sheet)    
+
+    def change_sub_actioner(self):
+        pos = self.target_pos_list[random.randrange(len(self.target_pos_list))]
+        self.sub_actioner = PosFixationActioner(self.game, pos)
+
+
+
+class RandomPosFixationAction_V1(RandomPosFixationAction):
+    def __init__(self, game: vzd.DoomGame):
+        pos_list = [
+            MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT, YPartition.MIDDLE),
+            MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE, YPartition.MIDDLE),
+            MapPos.get_pos(Section.TOP_PESSAGE, XPartition.RIGHT, YPartition.MIDDLE),
+
+            MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.LEFT, YPartition.MIDDLE),
+            MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.MIDDLE, YPartition.MIDDLE),
+            MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.RIGHT, YPartition.MIDDLE)
+        ]
+        super().__init__(game, pos_list, 0.01)
 
 class AttackActioner(AbstractActioner):
     def __init__(self, game: vzd.DoomGame):
