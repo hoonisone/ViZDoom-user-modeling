@@ -66,7 +66,8 @@ if __name__ == "__main__":
 
     # game.set_screen_resolution(vzd.ScreenResolution.RES_1920X1080)
     game.set_screen_resolution(vzd.ScreenResolution.RES_640X480)
-    
+    # game.set_screen_resolution(vzd.ScreenResolution.RES_1280X800)
+
     # Enables spectator mode, so you can play. Sounds strange but it is the agent who is supposed to watch not you.
     game.set_window_visible(True)
 
@@ -87,8 +88,8 @@ if __name__ == "__main__":
     agent = Agent(game)
 
     while not game.is_episode_finished():   
-        print(StateData2(game.get_state()).get_weapon_possess())
-        print(StateData2(game.get_state()).get_weapon_ammo())
+        # print(StateData2(game).get_weapon_possess())
+        # print(StateData2(game).get_weapon_ammo())
         agent.do_action()
         # empty = AbstractActioner.make_empty_action_order_sheet()
         # empty[PlayerAction.weapone6] = 1

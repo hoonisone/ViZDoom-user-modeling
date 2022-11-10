@@ -1,6 +1,5 @@
 
 from email.charset import add_alias
-from enum import IntEnum, auto
 from abc import abstractmethod
 
 # from multiprocessing.reduction import steal_handle
@@ -17,6 +16,8 @@ import math
 from time import time
 import vizdoom as vzd
 import random
+
+from deathmatch import *
 class PlayerAction(IntEnum):
     Atack = 0
     Run = 1
@@ -140,40 +141,105 @@ class AimActioner(AbstractActioner):
         # print("target_id:", str(target_id))
         
         if target_id is None:
-            self.doridori(stateData, action_order_sheet)
+            # self.doridori(stateData, action_order_sheet)
+            # self.only_turn(stateData, action_order_sheet)
+            self.see_center(stateData, action_order_sheet)
             return
         dist = stateData.get_x_pixel_dist(target_id)
         if dist is None:
             return 
 
-        if len(stateData.enemy_label_id_list) >= 5:
-            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(1920/2)/2 + math.sin(time()*5)*10
+        if len(stateData.enemy_label_id_list) >= 4:
+            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(self.game.get_screen_width()/2)/2# + math.sin(time()*5)*10
         else:
-            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(1920/2)/2 + math.sin(time()*10)
+            action_order_sheet[PlayerAction.rotateX] = 50 * dist/(self.game.get_screen_width()/2)/2# + math.sin(time()*10)
         
     def doridori(self, stateData: StateData2, action_order_sheet: PlayerAction):
         
         # if self.see_brightest(stateData, action_order_sheet):
         #     return 
+        speed = 1
+        angle = 5
         
+        v = angle*math.sin(time()*speed)
+        # action_order_sheet[PlayerAction.rotateX] = min(2, max(-3, 1+v*4))
+        # # action_order_sheet[PlayerAction.rotateX] = 3
         
-        v = math.sin(time()*10)
-        action_order_sheet[PlayerAction.rotateX] = min(2, max(-3, 1+v*4))
-        # action_order_sheet[PlayerAction.rotateX] = 3
-        
-        # if v > 0:
-        #     action_order_sheet[PlayerAction.rotateX] = -v
-        # else:
-        #     action_order_sheet[PlayerAction.rotateX] = v
-        
+        action_order_sheet[PlayerAction.rotateX] = v
+    
+    def only_turn(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        speed = 10
+        action_order_sheet[PlayerAction.rotateX] = speed
+    
+    def see_center(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        (x, y) = stateData.get_palyer_location()
 
+        r_x, r_y = 500-x, 500-y
+        angle = stateData.get_player().angle
+        
+        theta = math.atan((r_y)/(r_x))
+        
+        if (r_x<0):
+            theta += math.pi
+
+        theta = theta*180/math.pi
+        if theta < 0:
+            theta += 360
+
+        rotate = theta - angle        
+
+        print("pos = ", int(x), int(y), "theta = ", theta, "rotate: ", rotate, "cur : ", angle)
+
+        # print("pos = ", x, y, "theta = ", theta, "cur : ", angle)
+        action_order_sheet[PlayerAction.rotateX] = -rotate/2
+
+class RandomPosFixationAction(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame, target_pos_list:list, change_p):
+        super().__init__(game)
+        self.target_pos_list = target_pos_list
+        self.change_sub_actioner()
+
+    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        if random.random() < self.change_p:
+            self.change_sub_actioner()
+        self.sub_actioner.add_action(stateData, action_order_sheet)    
+
+    def change_sub_actioner(self):
+        self.sub_actioner = self.target_pos_list[random.randrange(len(self.target_pos_list))]
+
+class PosFixationActioner(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame, target_pos:tuple):
+        super().__init__(game)
+        self.target_pos = target_pos
+
+    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        (x, y) = stateData.get_palyer_location()
+        (tx, ty) = self.target_pos
+        r_x, r_y = tx-x, ty-y
+        angle = stateData.get_player().angle
+        
+        theta = math.atan((r_y)/(r_x))
+        
+        if (r_x<0):
+            theta += math.pi
+
+        theta = theta*180/math.pi
+        if theta < 0:
+            theta += 360
+
+        rotate = theta - angle        
+
+        print("pos = ", int(x), int(y), "theta = ", theta, "rotate: ", rotate, "cur : ", angle)
+
+        # print("pos = ", x, y, "theta = ", theta, "cur : ", angle)
+        action_order_sheet[PlayerAction.rotateX] = -rotate/2
 
 class AttackActioner(AbstractActioner):
     def __init__(self, game: vzd.DoomGame):
         super().__init__(game)
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
-        if len(stateData.enemy_label_id_list) >= 3:
+        if len(stateData.get_enemy_label_id_list()) >= 4:
             action_order_sheet[PlayerAction.Atack] = 1
             return
 
@@ -182,35 +248,11 @@ class AttackActioner(AbstractActioner):
             return
 
         if stateData.is_in_shotting_effective_zone(target_id):
-            print("True")
+            # print("True")
             action_order_sheet[PlayerAction.Atack] = 1
             return
-        print("False")
+        # print("False")
 
-class Section(IntEnum):
-
-    # 구역
-    TOP = auto()
-    BOTTOM = auto()
-    LEFT = auto()
-    RIGHT = auto()
-    CENTER1 = auto() # 센터 전체
-    CENTER2 = auto() # 센터의 중앙 부분 (너무 구석으로 가지 않기 위함)
-
-    TOP_PESSAGE = auto()
-    BOTTOM_PESSAGE = auto()
-    LEFT_PASSAGE = auto()
-    RIGHT_PASSAGE = auto()
-    
-class XPartition(IntEnum):
-    LEFT = 0
-    MIDDLE = 1
-    RIGHT = 2
-
-class YPartition(IntEnum):
-    TOP = 3
-    MIDDLE = 4
-    BOTTOM = 5
 
 class MoveToActioner(AbstractActioner):
     
@@ -384,155 +426,11 @@ class MoveToPositionActioner(MoveToActioner):
         super().__init__(game, MoveToPositionActioner.direction_map_dict[position], position)
 
 class MoveToSectionActioner(MoveToPositionActioner):
-    TOP_X_L = 50
-    TOP_X_R = 980
-    TOP_X_C = (TOP_X_L + TOP_X_R)/2
-    TOP_Y_T = 1260
-    TOP_Y_B = 1115
-    TOP_Y_C = (TOP_Y_T + TOP_Y_B)/2
 
-    BOTTOM_X_L = TOP_X_L
-    BOTTOM_X_R = TOP_X_R
-    BOTTOM_X_C = TOP_X_C
-    BOTTOM_Y_T = TOP_Y_T-1350
-    BOTTOM_Y_B = TOP_Y_B-1350
-    BOTTOM_Y_C = TOP_Y_C-1350
-
-    LEFT_X_L = -240
-    LEFT_X_R = -80
-    LEFT_X_C = (LEFT_X_L + LEFT_X_R)/2
-    LEFT_Y_T = 980
-    LEFT_Y_B = 50
-    LEFT_Y_C = (LEFT_Y_T + LEFT_Y_B)/2
-
-    RIGHT_X_L = LEFT_X_L + 1335
-    RIGHT_X_C = LEFT_X_C + 1335
-    RIGHT_X_R = LEFT_X_R + 1335
-    RIGHT_Y_T = LEFT_Y_T
-    RIGHT_Y_C = LEFT_Y_C
-    RIGHT_Y_B = LEFT_Y_B
-
-    CENTER_X_L = 20
-    CENTER_X_R = 1005
-    CENTER_X_C = (CENTER_X_L + CENTER_X_R)/2
-    CENTER_Y_T = 1000
-    CENTER_Y_B = 30
-    CENTER_Y_C = (CENTER_Y_T + CENTER_Y_B)/2
-    
-    # 입구 좌표
-    TOP_PESSAGE_X_L = 210
-    TOP_PESSAGE_X_R = 820
-    TOP_PESSAGE_X_C = (TOP_PESSAGE_X_L + TOP_PESSAGE_X_R)/2
-    TOP_PESSAGE_Y = 1060
-
-    BOTTOM_PESSAGE_X_L = TOP_PESSAGE_X_L
-    BOTTOM_PESSAGE_X_C = TOP_PESSAGE_X_C
-    BOTTOM_PESSAGE_X_R = TOP_PESSAGE_X_R        
-    BOTTOM_PESSAGE_Y = -40
-
-
-    LEFT_PESSAGE_X = -35
-    LEFT_PESSAGE_Y_T = 810
-    LEFT_PESSAGE_Y_B = 210
-    LEFT_PESSAGE_Y_C = (LEFT_PESSAGE_Y_T + LEFT_PESSAGE_Y_B)/2
-    
-    RIGHT_PESSAGE_X = 1055
-    RIGHT_PESSAGE_Y_T = LEFT_PESSAGE_Y_T
-    RIGHT_PESSAGE_Y_C = LEFT_PESSAGE_Y_C
-    RIGHT_PESSAGE_Y_B = LEFT_PESSAGE_Y_B
-
-    position = {
-        Section.TOP:{
-            XPartition.LEFT:TOP_X_L +10,
-            XPartition.MIDDLE:TOP_X_C ,
-            XPartition.RIGHT:TOP_X_R-10,
-            YPartition.TOP:TOP_Y_T -10,
-            YPartition.MIDDLE:TOP_Y_C,
-            YPartition.BOTTOM:TOP_Y_B +10,},
-
-        Section.BOTTOM:{
-            XPartition.LEFT:BOTTOM_X_L +10,
-            XPartition.MIDDLE:BOTTOM_X_C,
-            XPartition.RIGHT:BOTTOM_X_R-10,
-            YPartition.TOP:BOTTOM_Y_T-10,
-            YPartition.MIDDLE:BOTTOM_Y_C,
-            YPartition.BOTTOM:BOTTOM_Y_B +10,},
-
-        Section.LEFT:{
-            XPartition.LEFT:LEFT_X_L +10,
-            XPartition.MIDDLE:LEFT_X_C,
-            XPartition.RIGHT:LEFT_X_R-10,
-            YPartition.TOP:LEFT_Y_T-10,
-            YPartition.MIDDLE:LEFT_Y_C,
-            YPartition.BOTTOM:LEFT_Y_B +10,},
-
-        Section.RIGHT:{
-            XPartition.LEFT:RIGHT_X_L +10,
-            XPartition.MIDDLE:RIGHT_X_C,
-            XPartition.RIGHT:RIGHT_X_R-10,
-            YPartition.TOP:RIGHT_Y_T-10,
-            YPartition.MIDDLE:RIGHT_Y_C,
-            YPartition.BOTTOM:RIGHT_Y_B +10,},
-
-        Section.CENTER1:{
-            XPartition.LEFT:CENTER_X_L +10,
-            XPartition.MIDDLE:CENTER_X_C,
-            XPartition.RIGHT:CENTER_X_R-10,
-            YPartition.TOP:CENTER_Y_T-10,
-            YPartition.MIDDLE:CENTER_Y_C,
-            YPartition.BOTTOM:CENTER_Y_B +10,},
-
-        Section.CENTER2:{
-            XPartition.LEFT:TOP_PESSAGE_X_L +10,
-            XPartition.MIDDLE:TOP_PESSAGE_X_C,
-            XPartition.RIGHT:TOP_PESSAGE_X_R-10,
-            YPartition.TOP:LEFT_PESSAGE_Y_T-10,
-            YPartition.MIDDLE:LEFT_PESSAGE_Y_C,
-            YPartition.BOTTOM:LEFT_PESSAGE_Y_B +10,},
-
-        Section.TOP_PESSAGE:{
-            XPartition.LEFT:TOP_PESSAGE_X_L,
-            XPartition.MIDDLE:TOP_PESSAGE_X_C,
-            XPartition.RIGHT:TOP_PESSAGE_X_R,
-            YPartition.TOP:TOP_PESSAGE_Y,
-            YPartition.MIDDLE:TOP_PESSAGE_Y,
-            YPartition.BOTTOM:TOP_PESSAGE_Y,},
-
-
-        Section.BOTTOM_PESSAGE:{
-            XPartition.LEFT:BOTTOM_PESSAGE_X_L,
-            XPartition.MIDDLE:BOTTOM_PESSAGE_X_C,
-            XPartition.RIGHT:BOTTOM_PESSAGE_X_R,
-            YPartition.TOP:BOTTOM_PESSAGE_Y,
-            YPartition.MIDDLE:BOTTOM_PESSAGE_Y,
-            YPartition.BOTTOM:BOTTOM_PESSAGE_Y,},
-
-        Section.LEFT_PASSAGE:{
-            XPartition.LEFT:LEFT_PESSAGE_X,
-            XPartition.MIDDLE:LEFT_PESSAGE_X,
-            XPartition.RIGHT:LEFT_PESSAGE_X,
-            YPartition.TOP:LEFT_PESSAGE_Y_T,
-            YPartition.MIDDLE:LEFT_PESSAGE_Y_C,
-            YPartition.BOTTOM:LEFT_PESSAGE_Y_B,},
-
-
-        Section.RIGHT_PASSAGE:{
-            XPartition.LEFT:RIGHT_PESSAGE_X,
-            XPartition.MIDDLE:RIGHT_PESSAGE_X,
-            XPartition.RIGHT:RIGHT_PESSAGE_X,
-            YPartition.TOP:RIGHT_PESSAGE_Y_T,
-            YPartition.MIDDLE:RIGHT_PESSAGE_Y_C,
-            YPartition.BOTTOM:RIGHT_PESSAGE_Y_B,},
-    }
     def __init__(self, game, section:Section, x_part:XPartition, y_part:YPartition):
         super().__init__(game, MoveToSectionActioner.get_target_pos(section, x_part, y_part))
 
-    @staticmethod
-    def get_target_pos(section:Section, x_part:XPartition, y_part:YPartition): # (x, y)
-        x = MoveToSectionActioner.position[section][x_part]
-        y = MoveToSectionActioner.position[section][y_part]
-        # print("targetPos: ", x, y)
-        return (int(x), int(y)) 
+
         # return (y, x) 
 
 class RepetitiveMoveActioner(AbstractActioner):
@@ -540,47 +438,47 @@ class RepetitiveMoveActioner(AbstractActioner):
         self.idx = 0
         self.moveActionerList = [
             # 무기 모두 먹기
-            MoveToSectionActioner(game, Section.TOP_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE),
-            MoveToSectionActioner(game, Section.TOP, XPartition.MIDDLE , YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.TOP, XPartition.RIGHT, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.TOP, XPartition.RIGHT, YPartition.TOP),
-            MoveToSectionActioner(game, Section.TOP, XPartition.LEFT, YPartition.TOP),
-            MoveToSectionActioner(game, Section.TOP, XPartition.LEFT, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.TOP, XPartition.MIDDLE, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.TOP_PESSAGE, XPartition.MIDDLE, YPartition.MIDDLE),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.TOP, XPartition.MIDDLE , YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.TOP, XPartition.MIDDLE, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE, YPartition.MIDDLE)),
 
             # 힐팩 모두 먹기
-            MoveToSectionActioner(game, Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.TOP),
-            MoveToSectionActioner(game, Section.LEFT, XPartition.RIGHT, YPartition.TOP),
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.TOP),
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.LEFT, XPartition.RIGHT, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.LEFT, XPartition.RIGHT, YPartition.TOP),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.RIGHT, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.RIGHT, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.RIGHT, YPartition.TOP)),
 
             # 힐팩 존에 왔다 갔다 머물기
 
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.CENTER2, XPartition.LEFT, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.BOTTOM),
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.BOTTOM),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.BOTTOM)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.BOTTOM)),
 
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.MIDDLE),
-            MoveToSectionActioner(game, Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.MIDDLE),
-            MoveToSectionActioner(game, Section.CENTER2, XPartition.LEFT, YPartition.MIDDLE),
-            MoveToSectionActioner(game, Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.MIDDLE),
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.MIDDLE),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.MIDDLE)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.MIDDLE)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT, YPartition.MIDDLE)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.MIDDLE)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.MIDDLE)),
             
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.TOP),
-            MoveToSectionActioner(game, Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.TOP),
-            MoveToSectionActioner(game, Section.CENTER2, XPartition.LEFT, YPartition.TOP),
-            MoveToSectionActioner(game, Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.TOP),
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.TOP),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.TOP)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.TOP)),
 
             # 가운데 통로로 빠져나가기
-            MoveToSectionActioner(game, Section.LEFT, XPartition.LEFT, YPartition.MIDDLE),
-            MoveToSectionActioner(game, Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.MIDDLE),
-            MoveToSectionActioner(game, Section.CENTER2, XPartition.LEFT, YPartition.MIDDLE),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.MIDDLE)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.LEFT_PASSAGE, XPartition.MIDDLE, YPartition.MIDDLE)),
+            MoveToPositionActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT, YPartition.MIDDLE)),
         ]
 
     
@@ -592,7 +490,7 @@ class RepetitiveMoveActioner(AbstractActioner):
             # print("changed", "idx: ", self.idx)
         
         # name = ["Top", "Right", "Cector", "Right", "botton", "left", "centor", "left"]
-        print(self.idx, self.is_finished(stateData))
+        # print(self.idx, self.is_finished(stateData))
 
         self.moveActionerList[self.idx].add_action(stateData, action_order_sheet)
 

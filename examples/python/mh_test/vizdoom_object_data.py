@@ -15,8 +15,9 @@ def dist(p1, p2):
 
 class StateData2:
 
-    def __init__(self, state):
-        self.state = state
+    def __init__(self, game):
+        self.game = game
+        self.state = self.game.get_state()
         self.player_id = None
         self.enemy_id_list = None
         self.closest_enomy_object_id = None
@@ -158,7 +159,7 @@ class StateData2:
             return None
 
         # print("player_id: %s, player: %s, target: %s"%(str(self.get_player_id()), str(player_label), str(object_label)))
-        return (object_label.x + object_label.width/2) - 1920/2
+        return (object_label.x + object_label.width/2) - self.game.get_screen_width()/2
         # return (object_label.x + object_label.width/2) - (player_label.x+player_label.width/2)
 
     def is_in_shotting_effective_zone(self, id):
@@ -167,8 +168,16 @@ class StateData2:
         if x_pixel_dist is None:
             return False
         # print(math.fabs(x_pixel_dist))
-        print(math.fabs(x_pixel_dist), max(50, self.get_label(id).width))
-        return math.fabs(x_pixel_dist) <= max(50, self.get_label(id).width) # 플레이어와 표적의 중심 좌표가 표적의 withd 보다 짧은가
+        # print(math.fabs(x_pixel_dist), max(50, self.get_label(id).width))
+        return math.fabs(x_pixel_dist) <= max(self.game.get_screen_width()/50, self.get_label(id).width) # 플레이어와 표적의 중심 좌표가 표적의 withd 보다 짧은가
+
+    def get_palyer_location(self):
+        player = self.get_player()
+        return (player.position_x, player.position_y)
+
+
+    def get_player(self):
+        return self.get_object(self.get_player_id())
 
 
 def get_angle_from_player_to_direction(px, py, dx, dy): # player를 기준으로 (x, y)의 방향을 angle(0~359)로 반환
