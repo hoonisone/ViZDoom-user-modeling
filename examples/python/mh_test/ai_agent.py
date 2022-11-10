@@ -1,14 +1,16 @@
 from vizdoom_object_data import *
-from vizdoom_player_action import * 
+from actioner.moving_actioner import *
+from actioner.aim_actioner import *
+from actioner.weaopn_actioner import * 
 
-class Agent:
+class AdvancedAgent:
     def __init__(self, game):
         self.game = game
         # self.aimActioner = AimActioner(game)
         # self.aimActioner = PosFixationActioner(game, (300, 300))
         self.aimActioner = AimActioner(game)
         self.attackActioner = AttackActioner(game)
-        self.moveActioner = RepetitiveMoveActioner(game)
+        self.moveActioner = WeaponZoneHealpackZoneCycliedVisitAction(game)
         self.weaponChangeActioner = WeaponChangeActioner(game)
     
     def do_action(self):
@@ -24,5 +26,3 @@ class Agent:
         doom_action = AbstractActioner.make_into_doom_action(action_order_sheet)
         
         self.game.make_action(doom_action)
-
-    

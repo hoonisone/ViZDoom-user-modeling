@@ -12,7 +12,8 @@ from random import choice
 import vizdoom as vzd
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
-import os 
+import os
+from deathmatch import *
 # DEFAULT_CONFIG = os.path.join(vzd.scenarios_path, "my_way_home.cfg")
 DEFAULT_CONFIG = os.path.join('../../../scenarios', "deathmatch.cfg")
 
@@ -96,7 +97,27 @@ if __name__ =="__main__":
                     if l.is_blocking:
                         plt.plot([l.x1, l.x2], [l.y1, l.y2], color='black', linewidth=2)
             
-            plt.plot((210+820)/2, 1060, color='blue', marker='o')
+            pos_list = []
+            sections = [
+                Section.TOP,
+                Section.BOTTOM,
+                Section.LEFT,
+                Section.RIGHT,
+                Section.CENTER1,
+                Section.CENTER2,
+                Section.TOP_PESSAGE,
+                Section.BOTTOM_PESSAGE,
+                Section.LEFT_PESSAGE,
+                Section.RIGHT_PESSAGE
+                ]
+
+            for section in sections:
+                for x in range(3):
+                    for y in [3, 4, 5]:
+                        pos_list.append(MapPos.get_pos(section, x, y))
+                        
+            for pos in pos_list:
+                plt.plot(pos[0], pos[1], color='blue', marker='o')
             # plt.plot(1060, 210, color='blue', marker='o')
             # Show map
             plt.show()

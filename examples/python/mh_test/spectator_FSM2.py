@@ -25,7 +25,7 @@ import keyboard
 import matplotlib.pyplot as plt
 import numpy as np
 from vizdoom_object_data import *
-from vizdoom_player_action import * 
+ 
 import cv2
 from ai_agent import *
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     game.init()
     game.new_episode()
-    agent = Agent(game)
+    agent = AdvancedAgent(game)
 
     while not game.is_episode_finished():   
         # print(StateData2(game).get_weapon_possess())
