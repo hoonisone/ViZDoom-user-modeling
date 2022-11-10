@@ -20,6 +20,7 @@ class StateData2:
         self.state = self.game.get_state()
         self.player_id = None
         self.enemy_id_list = None
+        self.closest_enemy_id = None
         self.closest_enomy_object_id = None
         self.id_object_dict = None # id 와 object 쌍 저장
         self.id_label_dict = None # id 와 label 쌍 저장
@@ -138,6 +139,18 @@ class StateData2:
         return self.enemy_label_id_list
 
     def get_closest_enemy_label_id(self):
+        if self.closest_enemy_id is None:
+            min_dist = 1000000000
+            min_enemy_label_id = None
+            for enemy_label_id in self.get_enemy_id_list():
+                dist = self.get_dist_from_player(enemy_label_id)
+                if dist < min_dist:
+                    min_dist = dist
+                    min_enemy_label_id = enemy_label_id
+            self.closest_enemy__id = min_enemy_label_id
+        return self.closest_enemy_id
+
+    def get_visible_closest_enemy_label_id(self):
         if self.closest_enemy_label_id is None:
             min_dist = 1000000000
             min_enemy_label_id = None
@@ -148,6 +161,7 @@ class StateData2:
                     min_enemy_label_id = enemy_label_id
             self.closest_enemy_label_id = min_enemy_label_id
         return self.closest_enemy_label_id
+     
 
     def get_x_pixel_dist(self, id): # 화면 상에서 object와 플레이어의 중심좌표 간의 거리
         object_label = self.get_label(id)

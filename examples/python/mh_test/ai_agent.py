@@ -9,7 +9,7 @@ class AdvancedAgent:
         # self.aimActioner = AimActioner(game)
         # self.aimActioner = PosFixationActioner(game, (300, 300))
         self.aimActioner = AimActioner(game)
-        self.attackActioner = AttackActioner(game)
+        # self.attackActioner = AttackActioner(game)
         self.moveActioner = WeaponZoneHealpackZoneCycliedVisitAction(game)
         self.weaponChangeActioner = WeaponChangeActioner(game)
     
@@ -19,7 +19,7 @@ class AdvancedAgent:
 
         action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
         self.aimActioner.add_action(state, action_order_sheet)
-        self.attackActioner.add_action(state, action_order_sheet)
+        # self.attackActioner.add_action(state, action_order_sheet)
         self.moveActioner.add_action(state, action_order_sheet)
         self.weaponChangeActioner.add_action(state, action_order_sheet)
 

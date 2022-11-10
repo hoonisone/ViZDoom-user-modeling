@@ -66,7 +66,7 @@ class MoveToActioner(AbstractActioner):
         back  = True if direction[1] == -1 else False
         
 
-        action_order_sheet[PlayerAction.Run] = True
+        action_order_sheet[PlayerAction.Run] = False
         action_order_sheet[PlayerAction.MoveFront] = front
         action_order_sheet[PlayerAction.MoveBack] = back
         action_order_sheet[PlayerAction.MoveRight] = right
