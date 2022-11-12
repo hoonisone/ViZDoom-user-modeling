@@ -7,7 +7,7 @@
 import os
 from random import choice
 import vizdoom as vzd
-
+from vizdoom_object_data import *
 game = vzd.DoomGame()
 
 # Use CIG example config or your own.
@@ -52,7 +52,6 @@ game.set_mode(vzd.Mode.ASYNC_SPECTATOR)
 game.init()
 
 # Three example sample actions
-actions = [[1,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0]]
 
 # Play until the game (episode) is over.
 while not game.is_episode_finished():
@@ -67,7 +66,8 @@ while not game.is_episode_finished():
     # 이거 있어야 조작 가능
     # game.make_action(choice(actions))
     # game.make_action()
-
+    
+    
     # Check if player is dead
     if game.is_player_dead():
         # Use this to respawn immediately after death, new state will be available.

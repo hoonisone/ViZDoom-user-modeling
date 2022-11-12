@@ -35,18 +35,22 @@ class AimActioner(AbstractActioner):
   
 
 class PosFixationActioner(AbstractActioner):
-    def __init__(self, game: vzd.DoomGame, target_pos:tuple):
+    def __init__(self, game: vzd.DoomGame, target_pos:tuple, slow=10):
         super().__init__(game)
         self.target_pos = target_pos
+        self.slow = slow
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
-        (x, y) = stateData.get_palyer_location()
+        (x, y) = stateData.get_player_pos()
         (tx, ty) = self.target_pos
         r_x, r_y = tx-x, ty-y
         angle = stateData.get_player().angle
-        
+    
+        if r_x == 0:
+            return
+
         theta = math.atan((r_y)/(r_x))
-        
+
         if (r_x<0):
             theta += math.pi
 
@@ -54,12 +58,42 @@ class PosFixationActioner(AbstractActioner):
         if theta < 0:
             theta += 360
 
-        rotate = theta - angle        
+        rotate = theta - angle      
+        
+        if rotate > 180:
+            rotate -= 360  
+
+        if rotate < -180:
+            rotate += 360
 
         # print("pos = ", int(x), int(y), "theta = ", theta, "rotate: ", rotate, "cur : ", angle)
 
         # print("pos = ", x, y, "theta = ", theta, "cur : ", angle)
-        action_order_sheet[PlayerAction.rotateX] = -rotate/20
+        action_order_sheet[PlayerAction.rotateX] = -rotate/self.slow
+
+            # if (r_x>0):
+            #     theta = math.pi + theta
+            # theta = theta*180/math.pi
+            # rotate = theta - self.angle
+            # if rotate < 0:
+            #     rotate += 360
+
+            # if rotate > 180:
+            #     # rotate = 360-rotate
+            #     self.action[PlayerAction.TurnLeft]=True
+            #     self.action[PlayerAction.Run]=True
+            #     if rotate-180<5:
+            #         self.action[PlayerAction.TurnLeft]=False
+            #         self.action[PlayerAction.Run]=False
+            #         self.action[PlayerAction.rotateX] = -25
+
+            # else:
+            #     self.action[PlayerAction.TurnRight]=True
+            #     self.action[PlayerAction.Run]=True
+            #     if 180-rotate<5:
+            #         self.action[PlayerAction.TurnLeft]=False
+            #         self.action[PlayerAction.Run]=False
+            #         self.action[PlayerAction.rotateX] = 25
 
 class RandomPosFixationAction(AbstractActioner):
     def __init__(self, game: vzd.DoomGame, target_pos_list:list, change_p:float):
@@ -158,3 +192,4 @@ class AttackActioner(AbstractActioner):
         if stateData.is_in_shotting_effective_zone(target_id):
             action_order_sheet[PlayerAction.Atack] = 1
             return
+

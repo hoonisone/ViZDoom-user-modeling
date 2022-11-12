@@ -7,6 +7,7 @@ from draw_map import *
 from vizdoom_object_data import *
 from time import time
 import vizdoom as vzd
+import random
 
 
 class PlayerAction(IntEnum):
@@ -102,7 +103,21 @@ class AbstractActioner:
             action[key] = action_dict[key]
         return action
 
+class RandomActioner(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame, actioner_list:list):
+        super().__init__(game)
+        self.actioner_list = actioner_list
+        self.actinoer = None
+        self.set_new_actioner()
 
+    def set_new_actioner(self):
+        idx = random.randrange(len(self.actioner_list))
+        self.actinoer = self.actioner_list[idx](self.game)
+
+    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+        if self.actinoer.is_finished(stateData):
+            self.set_new_actioner()
+        self.actinoer.add_action(stateData, action_order_sheet)
 
 
 

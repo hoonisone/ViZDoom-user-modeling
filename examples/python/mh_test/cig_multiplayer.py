@@ -5,78 +5,81 @@
 # that can be hosted using cig_multiplayer_host.py script.
 #####################################################################
 
-from argparse import ArgumentParser
-from multiprocessing.util import close_all_fds_except
+# from argparse import ArgumentParser
+# from multiprocessing.util import close_all_fds_except
 import os
-from pydoc import ispackage
-from time import sleep
-from turtle import st
-from matplotlib.axis import Tick
 import vizdoom as vzd
-from PIL import Image
-from random import choice
-import keyboard
-import matplotlib.pyplot as plt
-import numpy as np
-from vizdoom_object_data import *
-from vizdoom_player_action import *
-from vizdoom_object_state_analysis import *
-from vizdoom_player_fsm import Doom_FSM
-
-def IsThereTargetInMySight(state, name):
-    for label in state.labels:
-        if label.object_name == name:
-            return True
-    return False
-
-def GetAllObjectIdListInView(state, name):
-    id_list = []
-    for label in state.labels:
-        if label.object_name == name:
-            id_list.append(label.object_id)
-    return id_list
-
-def GetClosestObjectId(state, id_list):
-    min_dist = 1000000
-    min_id = None
-    # for id in id_list:
-    #     if label.object_name == name:
-    #         return label.x + label.width/2
-    print(state.objects)
-    return None
+from agent.AggressiveAgent import *
+from agent.Perfect import *
 
 
-def OrganizeObjectInfor(objects):
-    dict = {}
-    for o in state.objects: # 동작 가능 - 존재하는 모든 오브젝트의 정보 반환
-        if o.name not in dict:
-            dict[o.name] = 0
-        dict[o.name] += 1
-    return dict
+# from pydoc import ispackage
+# from time import sleep
+# from turtle import st
+# from matplotlib.axis import Tick
+# from PIL import Image
+# from random import choice
+# import keyboard
+# import matplotlib.pyplot as plt
+# import numpy as np
+# from vizdoom_object_data import *
+# from vizdoom_object_state_analysis import *
+# from vizdoom_player_fsm import Doom_FSM
 
-###############################################
+# def IsThereTargetInMySight(state, name):
+#     for label in state.labels:
+#         if label.object_name == name:
+#             return True
+#     return False
 
-action1 = make_into_doom_action({
-    PlayerAction.Atack:False,
-    PlayerAction.rotateX: 5
-})
+# def GetAllObjectIdListInView(state, name):
+#     id_list = []
+#     for label in state.labels:
+#         if label.object_name == name:
+#             id_list.append(label.object_id)
+#     return id_list
 
-action2 = make_into_doom_action({
-    PlayerAction.Atack:True,
-    PlayerAction.rotateX: 5
-})
+# def GetClosestObjectId(state, id_list):
+#     min_dist = 1000000
+#     min_id = None
+#     # for id in id_list:
+#     #     if label.object_name == name:
+#     #         return label.x + label.width/2
+#     print(state.objects)
+#     return None
 
-action3 = make_into_doom_action({
-    PlayerAction.Atack:True,
-    PlayerAction.MoveFront:True,
-    PlayerAction.rotateX: 3
-})
 
-action4 = make_into_doom_action({
-    PlayerAction.Atack:True,
-    PlayerAction.MoveFront:True,
-    PlayerAction.rotateX: -3
-})
+# def OrganizeObjectInfor(objects):
+#     dict = {}
+#     for o in state.objects: # 동작 가능 - 존재하는 모든 오브젝트의 정보 반환
+#         if o.name not in dict:
+#             dict[o.name] = 0
+#         dict[o.name] += 1
+#     return dict
+
+# ###############################################
+
+# action1 = make_into_doom_action({
+#     PlayerAction.Atack:False,
+#     PlayerAction.rotateX: 5
+# })
+
+# action2 = make_into_doom_action({
+#     PlayerAction.Atack:True,
+#     PlayerAction.rotateX: 5
+# })
+
+# action3 = make_into_doom_action({
+#     PlayerAction.Atack:True,
+#     PlayerAction.MoveFront:True,
+#     PlayerAction.rotateX: 3
+# })
+
+# action4 = make_into_doom_action({
+#     PlayerAction.Atack:True,
+#     PlayerAction.MoveFront:True,
+#     PlayerAction.rotateX: -3
+# })
 
 
 game = vzd.DoomGame()
@@ -108,24 +111,24 @@ game.set_objects_info_enabled(True)
 game.set_sectors_info_enabled(True)
 game.set_labels_buffer_enabled(True)
 
-game.clear_available_game_variables()
-game.add_available_game_variable(vzd.GameVariable.POSITION_X)
-game.add_available_game_variable(vzd.GameVariable.POSITION_Y)
-game.add_available_game_variable(vzd.GameVariable.POSITION_Z)
-game.add_available_game_variable(vzd.GameVariable.ANGLE)
+# game.clear_available_game_variables()
+# game.add_available_game_variable(vzd.GameVariable.POSITION_X)
+# game.add_available_game_variable(vzd.GameVariable.POSITION_Y)
+# game.add_available_game_variable(vzd.GameVariable.POSITION_Z)
+# game.add_available_game_variable(vzd.GameVariable.ANGLE)
 
-game.add_available_game_variable(vzd.GameVariable.HEALTH)
-game.add_available_game_variable(vzd.GameVariable.ARMOR)
-game.add_available_game_variable(vzd.GameVariable.SELECTED_WEAPON)
+# game.add_available_game_variable(vzd.GameVariable.HEALTH)
+# game.add_available_game_variable(vzd.GameVariable.ARMOR)
+# game.add_available_game_variable(vzd.GameVariable.SELECTED_WEAPON)
 
-game.add_available_game_variable(vzd.GameVariable.AMMO3)
-game.add_available_game_variable(vzd.GameVariable.AMMO5)
-game.add_available_game_variable(vzd.GameVariable.AMMO6)
+# game.add_available_game_variable(vzd.GameVariable.AMMO3)
+# game.add_available_game_variable(vzd.GameVariable.AMMO5)
+# game.add_available_game_variable(vzd.GameVariable.AMMO6)
 
-actions = [[True, False, False], [False, True, False], [False, False, True]]
+# actions = [[True, False, False], [False, True, False], [False, False, True]]
 
 game.init()
-myDoomFSM = Doom_FSM(game, playstyle='aggressive')
+# myDoomFSM = Doom_FSM(game, playstyle='aggressive')
 # Three example sample actions
 # actions = [[1,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0]]
 
@@ -146,24 +149,27 @@ die_count = 0
 # aimActioner = AimActioner(game)
 # attackActioner = AttackActioner(game)
 idx = 0
+# agent = AggressiveAgent(game)
+agent = PerfectAgent(game)
 while not game.is_episode_finished():
+    agent.do_action()
     
-    state = game.get_state()
-    myDoomFSM.updateState(state)
+    # state = game.get_state()
+    # myDoomFSM.updateState(state)
 
-    game.make_action(myDoomFSM.getAction())
-    # print(myDoomFSM.getAction())
+    # game.make_action(myDoomFSM.getAction())
+    # # print(myDoomFSM.getAction())
 
-    if keyboard.is_pressed("Enter"):    
-        print(myDoomFSM.getLocation())
+    # if keyboard.is_pressed("Enter"):    
+    #     print(myDoomFSM.getLocation())
 
 
-    frags = game.get_game_variable(vzd.GameVariable.FRAGCOUNT)
-    if frags != last_frags:
-        last_frags = frags
-        print("Player " + str(player_number) + " has " + str(frags) + " frags.")
-        # print(last_frags + ' kills and' + die_count + ' deaths')
-        print(str(frags) + ' kills and  ' + str(die_count) + ' deaths')
+    # frags = game.get_game_variable(vzd.GameVariable.FRAGCOUNT)
+    # if frags != last_frags:
+    #     last_frags = frags
+    #     print("Player " + str(player_number) + " has " + str(frags) + " frags.")
+    #     # print(last_frags + ' kills and' + die_count + ' deaths')
+    #     print(str(frags) + ' kills and  ' + str(die_count) + ' deaths')
 
 
 
@@ -171,10 +177,10 @@ while not game.is_episode_finished():
     if game.is_player_dead():
         die_count+=1
         print("Player " + str(player_number) + " died.")
-        print(str(frags) + ' kills and  ' + str(die_count) + ' deaths')
+        # print(str(frags) + ' kills and  ' + str(die_count) + ' deaths')
         # Use this to respawn immediately after death, new state will be available.
         game.respawn_player()
-        myDoomFSM.ResetFSM()
+        # myDoomFSM.ResetFSM()
 
 
 game.close()

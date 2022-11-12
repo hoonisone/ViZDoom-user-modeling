@@ -18,6 +18,7 @@ class StateData2:
     def __init__(self, game):
         self.game = game
         self.state = self.game.get_state()
+        self.palyer_pos = None
         self.player_id = None
         self.enemy_id_list = None
         self.closest_enemy_id = None
@@ -58,13 +59,20 @@ class StateData2:
     def get_player_id(self):
         if self.player_id == None:
             for object in self.state.objects:
-                if object.name == "DoomPlayer":
+                player_pos = self.get_player_pos()
+                object_pos = (object.position_x, object.position_y)
+                
+                if object.name == "DoomPlayer" and dist(player_pos, object_pos) < 5:
                     self.player_id = object.id
                     break
         return self.player_id
     
     def is_enemy(self, id): # object가 적인지 판단.
-        return self.get_object(id).name in enemy_name_list
+        if self.get_object(id).name in enemy_name_list:
+            return True
+        if (self.get_object(id).name == "DoomPlayer") and (id != self.get_player_id()): # 적 플레이어
+            return True
+        return False
 
     def get_enemy_id_list(self): # 존재하는 모든 적 object의 id 리스트 반환
         if self.enemy_id_list == None:
@@ -185,14 +193,18 @@ class StateData2:
         # print(math.fabs(x_pixel_dist), max(50, self.get_label(id).width))
         return math.fabs(x_pixel_dist) <= max(self.game.get_screen_width()/50, self.get_label(id).width) # 플레이어와 표적의 중심 좌표가 표적의 withd 보다 짧은가
 
-    def get_palyer_location(self):
-        player = self.get_player()
-        return (player.position_x, player.position_y)
-
+    def get_player_pos(self):
+        if self.palyer_pos == None:
+            x = self.get_game_variagle(GameVariable.POSITION_X)
+            y = self.get_game_variagle(GameVariable.POSITION_Y)
+            self.palyer_pos = (x, y)
+        return self.palyer_pos
 
     def get_player(self):
         return self.get_object(self.get_player_id())
 
+    def get_game_variagle(self, variable:GameVariable):
+        return self.state.game_variables[variable]
 
 def get_angle_from_player_to_direction(px, py, dx, dy): # player를 기준으로 (x, y)의 방향을 angle(0~359)로 반환
 

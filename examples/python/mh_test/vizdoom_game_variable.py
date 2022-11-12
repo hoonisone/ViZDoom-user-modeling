@@ -21,3 +21,8 @@ class GameVariable(IntEnum):
         WEAPON5 = 17,
         WEAPON6 = 18,
 
+        
+        POSITION_X = 19
+        POSITION_Y = 20
+        POSITION_Z = 21
+

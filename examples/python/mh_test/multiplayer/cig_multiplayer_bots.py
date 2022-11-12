@@ -7,6 +7,12 @@
 import os
 from random import choice
 import vizdoom as vzd
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+# import sys 
+# sys.path.insert(0, "./..")
+
+from agent.AggressiveAgent import *
 
 game = vzd.DoomGame()
 
@@ -61,9 +67,14 @@ for i in range(episodes):
     for i in range(bots):
         game.send_game_command("addbot")
 
-    # Play until the game (episode) is over.
-    while not game.is_episode_finished():
+    agent = AggressiveAgent(game)
+    
+            
 
+    while not game.is_episode_finished():   
+        # print(StateData2(game).get_weapon_possess())
+        # print(StateData2(game).get_weapon_ammo())
+        agent.do_action()
         # Get the state.
         state = game.get_state()
 

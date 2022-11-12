@@ -66,7 +66,7 @@ class MoveToActioner(AbstractActioner):
         back  = True if direction[1] == -1 else False
         
 
-        action_order_sheet[PlayerAction.Run] = False
+        action_order_sheet[PlayerAction.Run] = True #False
         action_order_sheet[PlayerAction.MoveFront] = front
         action_order_sheet[PlayerAction.MoveBack] = back
         action_order_sheet[PlayerAction.MoveRight] = right
@@ -271,36 +271,7 @@ class FarmingHealpackZone(SequentialVisitActioner):
         path = FarmingHealpackZone.path_list[random.randrange(len(FarmingHealpackZone.path_list))]
         super().__init__(game, path)
 
-class WeaponZoneHealpackZoneCycliedVisitAction(CycledActioner):
-    # 무기존, 힐팩존 반복 방문
-    def __init__(self, game):
-        moveActionerList = [
-        # 무기 모두 먹기
-            FarmingWeaponZone(game),
-            FarmingHealpackZone(game),
-            VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.MIDDLE)),
-            FarmingHealpackZone(game),
-            VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.MIDDLE)),
-            FarmingHealpackZone(game),
-            VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.MIDDLE)),
-            FarmingWeaponZone(game),
-            FarmingHealpackZone(game),
-            VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.MIDDLE)),
-            FarmingHealpackZone(game),
-            VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.MIDDLE)),
-            FarmingHealpackZone(game),
-            VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.MIDDLE)),
 
-        ]
-        super().__init__(game, moveActionerList)
-
-        # class MoveToSectionActioner(VisitActioner):
-
-#     def __init__(self, game, section:Section, x_part:XPartition, y_part:YPartition):
-#         super().__init__(game, MoveToSectionActioner.get_target_pos(section, x_part, y_part))
-
-
-        # return (y, x) 
 
 class EatWeaponAndStayCenterMovingActioner(AbstractActioner):
     def __init__(self, game):

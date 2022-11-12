@@ -27,7 +27,9 @@ import numpy as np
 from vizdoom_object_data import *
  
 import cv2
-from ai_agent import *
+from agent.agent import *
+from agent.AdvancedAgent import *
+from agent.AggressiveAgent import *
 
 from draw_map import *
 
@@ -85,7 +87,8 @@ if __name__ == "__main__":
 
     game.init()
     game.new_episode()
-    agent = AdvancedAgent(game)
+    # agent = AdvancedAgent(game)
+    agent = AggressiveAgent(game)
 
     while not game.is_episode_finished():   
         # print(StateData2(game).get_weapon_possess())
