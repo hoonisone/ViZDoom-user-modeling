@@ -11,6 +11,7 @@ class AggressiveAgent(AbstractAgent):
         # self.attackActioner = AttackActioner(game)
         self.moveActioner = AggressiveMovementActioner(game)
         self.weaponChangeActioner = WeaponChangeActioner(game)
+        
 
     def do_action(self):
         state = StateData2(self.game)
@@ -37,63 +38,4 @@ class AggressiveMovementActioner(AbstractActioner):
         self.actioner.add_action(stateData, action_order_sheet)
         
 
-class StayCenter(RandomActioner):
-    actioner_list = [
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.TOP),),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.LEFT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.MIDDLE , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.TOP)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.MIDDLE)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.BOTTOM)),
-        lambda game: VisitActioner(game, MapPos.get_pos(Section.CENTER2, XPartition.RIGHT , YPartition.BOTTOM)),
-    ]
-
-    def __init__(self, game):
-        super().__init__(game, StayCenter.actioner_list)
+FarmingHealpackZone

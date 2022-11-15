@@ -104,15 +104,15 @@ class AbstractActioner:
         return action
 
 class RandomActioner(AbstractActioner):
-    def __init__(self, game: vzd.DoomGame, actioner_list:list):
+    def __init__(self, game: vzd.DoomGame, actioner_generator_list:list):
         super().__init__(game)
-        self.actioner_list = actioner_list
+        self.actioner_generator_list = actioner_generator_list
         self.actinoer = None
         self.set_new_actioner()
 
     def set_new_actioner(self):
-        idx = random.randrange(len(self.actioner_list))
-        self.actinoer = self.actioner_list[idx](self.game)
+        idx = random.randrange(len(self.actioner_generator_list))
+        self.actinoer = self.actioner_generator_list[idx](self.game)
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
         if self.actinoer.is_finished(stateData):
@@ -122,6 +122,9 @@ class RandomActioner(AbstractActioner):
 
 
 class SequentialActioner(AbstractActioner):
+    """
+        Actioner 생성 함수 리스트를 건네면 순서대로 생성하여 수행해준다.
+    """
     def __init__(self, game: vzd.DoomGame, actioner_list:list):
         super().__init__(game)
         self.actioner_list = actioner_list
@@ -136,7 +139,7 @@ class SequentialActioner(AbstractActioner):
             self._is_finished = True
             return
 
-        self.sub_actioner = self.actioner_list[self.idx]
+        self.sub_actioner = self.actioner_list[self.idx](self.game)
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
         if self._is_finished: # 수행할 게 없음
@@ -149,25 +152,23 @@ class SequentialActioner(AbstractActioner):
 
     def is_finished(self, stateData: StateData2) -> bool:
         return self._is_finished
-
-    def init(self) -> None:
-        for actioner in self.actioner_list:
-            actioner.init()
-
-        self.idx = -1
-        self.sub_actioner = None
-        self._is_finished = False
-        self.set_next_actioner()
-        return super().init()
         
 class CycledActioner(AbstractActioner):
-    def __init__(self, game:vzd.DoomGame, actioner_list:list):
+    """
+        Actioner 생성 함수 리스트를 건네면 순서대로 생성하여 수행해주며
+        다 끝나면 다시 반복한다.
+    """
+    def __init__(self, game:vzd.DoomGame, actioner_generator_list:list):
         super().__init__(game)  
-        self.sequentialVisitActioner = SequentialActioner(self.game, actioner_list)
+        self.actioner_generator_list = actioner_generator_list
+        self.set_sequential_actioner()
+
+    def set_sequential_actioner(self):
+        self.sequentialVisitActioner = SequentialActioner(self.game, self.actioner_generator_list)
 
     def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
         if self.sequentialVisitActioner.is_finished(stateData): # 끝나면 다시시작
-            self.sequentialVisitActioner.init()
+            self.set_sequential_actioner()
 
         self.sequentialVisitActioner.add_action(stateData, action_order_sheet)
 
