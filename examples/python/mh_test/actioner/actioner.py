@@ -1,10 +1,10 @@
 
 from email.charset import add_alias
 from abc import abstractmethod
-from deathmatch import *
+from actioner.deathmatch_pos import *
 
-from draw_map import *
-from vizdoom_object_data import *
+from actioner.draw_map import *
+from state.vizdoom_object_data import *
 from time import time
 import vizdoom as vzd
 import random

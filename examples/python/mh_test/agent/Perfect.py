@@ -1,5 +1,5 @@
 from agent.agent import *
-from vizdoom_object_data import *
+from state.vizdoom_object_data import *
 from actioner.moving_actioner import *
 from actioner.aim_actioner import *
 from actioner.weaopn_actioner import * 
@@ -25,7 +25,7 @@ class PerfectAgent(AbstractAgent):
         
 
 class AggressiveMovementActioner(AbstractActioner):
-    # 무기존, 힐팩존 반복 방문
+
     def __init__(self, game):
         super().__init__(game)
         self.actioner = FarmingWeaponZone(game)

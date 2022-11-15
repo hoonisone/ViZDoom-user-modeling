@@ -13,7 +13,7 @@ import vizdoom as vzd
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import os
-from deathmatch import *
+from actioner.deathmatch_pos import *
 # DEFAULT_CONFIG = os.path.join(vzd.scenarios_path, "my_way_home.cfg")
 DEFAULT_CONFIG = os.path.join('../../../scenarios', "deathmatch.cfg")
 

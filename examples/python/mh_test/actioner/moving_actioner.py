@@ -1,7 +1,7 @@
 import vizdoom as vzd
 from actioner.actioner import *
-from deathmatch import *
-from draw_map import *
+from actioner.deathmatch_pos import *
+from actioner.draw_map import *
 import random
 
 class MoveToActioner(AbstractActioner):

@@ -1,7 +1,7 @@
 import vizdoom as vzd
 import math
-from deathmatch import *
-from vizdoom_object_data import *
+from actioner.deathmatch_pos import *
+from state.vizdoom_object_data import *
 from actioner.actioner import * 
 
 import random

@@ -4,9 +4,9 @@ from tkinter.messagebox import NO
 from turtle import st
 from winsound import PlaySound
 import numpy as np
-from vizdoom_object_name import *
+from vizdoom_enum.vizdoom_object_name import *
 import math
-from vizdoom_game_variable import *
+from vizdoom_enum.vizdoom_game_variable import *
 
 def dist(p1, p2):
     p1 = np.array(p1)
