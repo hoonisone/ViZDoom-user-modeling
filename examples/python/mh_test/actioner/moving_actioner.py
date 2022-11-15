@@ -3,6 +3,8 @@ from actioner.actioner import *
 from actioner.deathmatch_pos import *
 from actioner.draw_map import *
 import random
+from enum import IntEnum
+
 
 class MoveToActioner(AbstractActioner):
     
@@ -189,6 +191,377 @@ class FarmingWeaponZone(SequentialActioner):
         path = FarmingWeaponZone.path_list[random.randrange(len(FarmingWeaponZone.path_list))]
         super().__init__(game, path)
 
+class VisitTopSector(SequentialActioner):
+    path_list = [
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+        ],
+    ]
+    def __init__(self, game):
+        path = VisitTopSector.path_list[random.randrange(len(VisitTopSector.path_list))]
+        super().__init__(game, path)
+
+class VisitBottomSector(SequentialActioner):
+    path_list = [
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+        ],
+
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+        ],
+
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+        ],
+    ]
+    def __init__(self, game):
+        path = VisitBottomSector.path_list[random.randrange(len(VisitBottomSector.path_list))]
+        super().__init__(game, path)
+
+class VisitLeftSector(SequentialActioner):
+    path_list = [
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+        ],
+    ]
+    def __init__(self, game):
+        path = VisitLeftSector.path_list[random.randrange(len(VisitLeftSector.path_list))]
+        super().__init__(game, path)
+
+class VisitRightSector(SequentialActioner):
+    path_list = [
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+        ],
+    ]
+    def __init__(self, game):
+        path = VisitRightSector.path_list[random.randrange(len(VisitRightSector.path_list))]
+        super().__init__(game, path)
+
+class HideTopSector(SequentialActioner):
+    path_list = [
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.LEFT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.TOP, XPartition.RIGHT, YPartition.BOTTOM)),
+        ],        
+    ]
+    def __init__(self, game):
+        path = HideTopSector.path_list[random.randrange(len(HideTopSector.path_list))]
+        super().__init__(game, path)
+
+class HideBottomSector(SequentialActioner):
+    path_list = [
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.LEFT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.RIGHT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.LEFT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.LEFT , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.LEFT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.BOTTOM)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.BOTTOM, XPartition.RIGHT, YPartition.TOP)),
+        ],        
+    ]
+    def __init__(self, game):
+        path = HideBottomSector.path_list[random.randrange(len(HideBottomSector.path_list))]
+        super().__init__(game, path)
+
+class HideLeftSector(SequentialActioner):
+    path_list = [
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.RIGHT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.RIGHT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.RIGHT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.LEFT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.LEFT, XPartition.RIGHT, YPartition.BOTTOM)),
+        ],    
+    ]
+    def __init__(self, game):
+        path = HideLeftSector.path_list[random.randrange(len(HideLeftSector.path_list))]
+        super().__init__(game, path)
+
+class HideRightSector(SequentialActioner):
+    path_list = [
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.LEFT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.TOP)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.LEFT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.LEFT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.LEFT, YPartition.BOTTOM)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.LEFT, YPartition.TOP)),
+        ],
+        [
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.RIGHT, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT_PESSAGE, XPartition.MIDDLE , YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.MIDDLE, YPartition.MIDDLE)),
+            lambda game : VisitActioner(game, MapPos.get_pos(Section.RIGHT, XPartition.LEFT, YPartition.BOTTOM)),
+        ],    
+    ]
+    def __init__(self, game):
+        path = HideRightSector.path_list[random.randrange(len(HideRightSector.path_list))]
+        super().__init__(game, path)
+
 class FarmingHealpackZone(SequentialActioner):
     path1 = [
         lambda game : VisitActioner(game, MapPos.get_pos(Section.CENTER1, XPartition.LEFT , YPartition.TOP)),
@@ -332,3 +705,78 @@ class StayCenter(RandomActioner):
 
     def __init__(self, game):
         super().__init__(game, StayCenter.actioner_list)
+
+
+class MoveFowrward(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame):
+        super().__init__(game)
+
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction) -> None:
+        action_order_sheet[PlayerAction.MoveFront] = 1
+        action_order_sheet[PlayerAction.Run] = True
+
+class MoveBack(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame):
+        super().__init__(game)
+
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction) -> None:
+        action_order_sheet[PlayerAction.MoveBack] = 1
+        action_order_sheet[PlayerAction.Run] = True
+
+class MoveRight(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame):
+        super().__init__(game)
+
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction) -> None:
+        action_order_sheet[PlayerAction.MoveRight] = 1
+        action_order_sheet[PlayerAction.Run] = True
+
+class MoveLeft(AbstractActioner):
+    def __init__(self, game: vzd.DoomGame):
+        super().__init__(game)
+
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction) -> None:
+        action_order_sheet[PlayerAction.MoveLeft] = 1
+        action_order_sheet[PlayerAction.Run] = True
+
+class BalanceMovementActioner(AbstractActioner):
+    class State(IntEnum):
+        HEALPACK_ZOME = auto()
+        WEAPON_ZONE = auto()
+        CENTER = auto()
+
+    # HP와 AMMO에 따라 무기존과 힐팩존을 방문하고 평소에는 중앙에서 배회
+    def __init__(self, game, health_threshold, weapon_ammo_threshold):
+        super().__init__(game)
+        self.actioner = FarmingWeaponZone(game)
+        self.health_threshold = health_threshold
+        self.weapon_ammo_threshold = weapon_ammo_threshold
+        self.state = BalanceMovementActioner.State.CENTER
+
+    def calculate_state(self, stateAnalyzer: StateAnalyzer):
+        if stateAnalyzer.get_player_hp() < self.health_threshold:
+            return BalanceMovementActioner.State.HEALPACK_ZOME
+        elif stateAnalyzer.get_cur_weapon_armor() < self.weapon_ammo_threshold:
+            return BalanceMovementActioner.State.WEAPON_ZONE
+        else:
+            return BalanceMovementActioner.State.CENTER
+
+    def update_state(self, stateAnalyzer: StateAnalyzer):
+        state = self.calculate_state(stateAnalyzer)
+        print("cur:", self.state, "target:", state)
+        if self.state != state or self.actioner.is_finished(stateAnalyzer):
+            print("changed")
+            if state == BalanceMovementActioner.State.HEALPACK_ZOME:
+                self.actioner = FarmingHealpackZone(self.game)
+            elif state == BalanceMovementActioner.State.WEAPON_ZONE:
+                self.actioner = FarmingWeaponZone(self.game)
+            elif state == BalanceMovementActioner.State.CENTER:
+                self.actioner = StayCenter(self.game)
+            self.state = state
+
+    def add_action(self, stateAnalyzer: StateAnalyzer, action_order_sheet: PlayerAction):
+        self.update_state(stateAnalyzer)
+
+        # 하위 액션 수행        
+        self.actioner.add_action(stateAnalyzer, action_order_sheet)
+        

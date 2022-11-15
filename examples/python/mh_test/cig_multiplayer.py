@@ -1,7 +1,9 @@
 import os
 import vizdoom as vzd
-from agent.AggressiveAgent import *
-from agent.Perfect import *
+from agent.banlencedAgent import *
+from agent.RunnerAgent import *
+from agent.HiderAgent import *
+
 game = vzd.DoomGame()
 scenarios_path = '../../../scenarios'
 game.load_config(os.path.join(scenarios_path, "deathmatch_multi.cfg"))
@@ -19,8 +21,12 @@ game.set_labels_buffer_enabled(True)
 
 game.init()
 
-agent = AggressiveAgent(game)
-# agent = PerfectAgent(game)
+
+# agent = DefensiveAgent(game)
+# agent = AggressiveAgent(game)
+# agent = AimerAgent(game)
+agent = HiderAgent(game)
+# agent = RunnerAgent(game)
 while not game.is_episode_finished():
     agent.do_action()
     

@@ -6,14 +6,14 @@ from actioner.draw_map import *
 class WeaponChangeActioner(AbstractActioner):
     def __init__(self, game:vzd.DoomGame):
         super().__init__(game)
+        self.next_change_time = time() + random.randrange(3, 10)
 
     def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         # return super().add_action(stateData, action_order_sheet)
         # print(stateData.state.game_variables[4])
         # p = random.random()
         
-        if int(time()) % 5 == 0:
-
+        if self.next_change_time < time():
             weapon = [
                 PlayerAction.weapone1,
                 PlayerAction.weapone1,
@@ -25,16 +25,16 @@ class WeaponChangeActioner(AbstractActioner):
             ]
             possess = stateData.get_weapon_possess()
             ammo = stateData.get_weapon_ammo()
-            for i in [6, 4, 2, 3, 5, 1]:
+            for i in [6, 4, 3, 5, 2, 3, 1]:
                 if 0 < possess[i] and 0 < ammo[i]:
                     empty = AbstractActioner.make_empty_action_order_sheet()
-                    empty[PlayerAction.weapone6] = 1
+                    empty[weapon[i]] = 1
                     empty = AbstractActioner.make_into_doom_action(empty)
                     self.game.make_action(empty)
-                    action_order_sheet[weapon[i]] = 1
+                    # action_order_sheet[weapon[i]] = 1
                     return
 
-            action_order_sheet[PlayerAction.weapone1] = 1
+            # action_order_sheet[PlayerAction.weapone1] = 1
         
 
         # if p < 0.5:

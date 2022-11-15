@@ -20,15 +20,32 @@ class StateAnalyzer:
         self.state = self.game.get_state()
         self.palyer_pos = None
         self.player_id = None
-        self.enemy_id_list = None
-        self.closest_enemy_id = None
-        self.closest_enomy_object_id = None
+        
+
         self.id_object_dict = None # id 와 object 쌍 저장
         self.id_label_dict = None # id 와 label 쌍 저장
+
+        self.enemy_id_list = None
         self.enemy_label_id_list = None
+        
         self.closest_enemy_label_id = None
+        self.closest_enomy_object_id = None
+
+        self.enemy_count = None
+
         self.weapon_ammo = None
         self.weapon_possess = None
+
+    def get_player_hp(self):
+        return self.state.game_variables[GameVariable.HEALTH]
+
+    def get_cur_weapon_armor(self):
+        return self.state.game_variables[GameVariable.SELECTED_WEAPON_AMMO]
+
+    def get_enemy_count(self):
+        if self.enemy_count == None:
+            self.enemy_count = len(self.get_enemy_label_id_list())
+        return self.enemy_count
 
     def get_weapon_possess(self):
         if self.weapon_possess == None:
@@ -56,6 +73,12 @@ class StateAnalyzer:
                 v[GameVariable.AMMO6]]
         return self.weapon_ammo
 
+    def is_enemy_exist_in_screen(self):
+        return len(self.get_enemy_label_id_list()) > 0
+
+    def is_enemy_exist_in_game(self):
+        return len(self.get_enemy_id_list()) > 0
+
     def get_player_id(self):
         if self.player_id == None:
             for object in self.state.objects:
@@ -74,29 +97,7 @@ class StateAnalyzer:
             return True
         return False
 
-    def get_enemy_id_list(self): # 존재하는 모든 적 object의 id 리스트 반환
-        if self.enemy_id_list == None:
-            enemy_id_list= []
-            for object in self.state.objects:
-                if self.is_enemy(object.id):
-                    enemy_id_list.append(object.id)
 
-            self.enemy_id_list = enemy_id_list
-
-        return self.enemy_id_list
-
-    def get_closest_enemy_object_id(self):
-        if self.closest_enomy_object_id == None:
-            min_dist = 10000000
-            min_enemy_id = None
-            for id in self.get_enemy_id_list():
-                dist = self.get_dist_from_player(id)
-                if dist < min_dist:
-                    min_enemy_id = id
-                    min_dist = dist
-            self.closest_enomy_object_id = min_enemy_id
-        
-        return self.closest_enomy_object_id
                 
     def get_dist_from_player(self, id):
         player = self.get_object(self.get_player_id())
@@ -146,19 +147,31 @@ class StateAnalyzer:
 
         return self.enemy_label_id_list
 
-    def get_closest_enemy_label_id(self):
-        if self.closest_enemy_id is None:
-            min_dist = 1000000000
-            min_enemy_label_id = None
-            for enemy_label_id in self.get_enemy_id_list():
-                dist = self.get_dist_from_player(enemy_label_id)
-                if dist < min_dist:
-                    min_dist = dist
-                    min_enemy_label_id = enemy_label_id
-            self.closest_enemy__id = min_enemy_label_id
-        return self.closest_enemy_id
+    def get_enemy_id_list(self): # 존재하는 모든 적 object의 id 리스트 반환
+        if self.enemy_id_list == None:
+            enemy_id_list= []
+            for object in self.state.objects:
+                if self.is_enemy(object.id):
+                    enemy_id_list.append(object.id)
 
-    def get_visible_closest_enemy_label_id(self):
+            self.enemy_id_list = enemy_id_list
+
+        return self.enemy_id_list
+
+    def get_closest_enemy_object_id(self):
+        if self.closest_enomy_object_id == None:
+            min_dist = 10000000
+            min_enemy_id = None
+            for id in self.get_enemy_id_list():
+                dist = self.get_dist_from_player(id)
+                if dist < min_dist:
+                    min_enemy_id = id
+                    min_dist = dist
+            self.closest_enomy_object_id = min_enemy_id
+        
+        return self.closest_enomy_object_id
+
+    def get_closest_enemy_label_id(self):
         if self.closest_enemy_label_id is None:
             min_dist = 1000000000
             min_enemy_label_id = None
@@ -170,6 +183,9 @@ class StateAnalyzer:
             self.closest_enemy_label_id = min_enemy_label_id
         return self.closest_enemy_label_id
      
+
+
+
 
     def get_x_pixel_dist(self, id): # 화면 상에서 object와 플레이어의 중심좌표 간의 거리
         object_label = self.get_label(id)
@@ -184,14 +200,17 @@ class StateAnalyzer:
         return (object_label.x + object_label.width/2) - self.game.get_screen_width()/2
         # return (object_label.x + object_label.width/2) - (player_label.x+player_label.width/2)
 
-    def is_in_shotting_effective_zone(self, id):
-
+    def is_in_shotting_effective_zone(self, id, object_range_ratio = 1, screen_range_ratio = 0):
+        """
+        * option1: 대상의 범위를 object_range_ratio 만큼 확대하여 계산
+        * option2: 대상의 크기에 관계 없이 화면 중간에서 screen_range_ratio 안에 있으면 True
+        """
         x_pixel_dist = self.get_x_pixel_dist(id)
         if x_pixel_dist is None:
             return False
         # print(math.fabs(x_pixel_dist))
         # print(math.fabs(x_pixel_dist), max(50, self.get_label(id).width))
-        return math.fabs(x_pixel_dist) <= max(self.game.get_screen_width()/50, self.get_label(id).width) # 플레이어와 표적의 중심 좌표가 표적의 withd 보다 짧은가
+        return math.fabs(x_pixel_dist) <= max(self.game.get_screen_width()*screen_range_ratio/2, self.get_label(id).width*object_range_ratio) # 플레이어와 표적의 중심 좌표가 표적의 withd 보다 짧은가
 
     def get_player_pos(self):
         if self.palyer_pos == None:
@@ -202,6 +221,10 @@ class StateAnalyzer:
 
     def get_player(self):
         return self.get_object(self.get_player_id())
+
+    def get_object_pos(self, object_id):
+        object = self.get_object(object_id)
+        return (object.position_x, object.position_y) 
 
     def get_game_variagle(self, variable:GameVariable):
         return self.state.game_variables[variable]

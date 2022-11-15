@@ -42,18 +42,25 @@ class AbstractActioner:
     def __init__(self, game:vzd.DoomGame):
         self.game = game
 
-    def make_action(self, stateData:StateAnalyzer = None, action_order_sheet:dict = None): # Actioner가 담당하는 동작의 한 step에 해당하는 action을 생성한다.
-        if stateData is None:
-            stateData = StateAnalyzer(self.game.get_state())
+    def do_action(self) -> None:
+        state = StateAnalyzer(self.game)
+        action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
+        self.add_action(state, action_order_sheet)
+        doom_action = AbstractActioner.make_into_doom_action(action_order_sheet)
+        self.game.make_action(doom_action)
 
-        if action_order_sheet is None:
-            action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
+    # def make_action(self, stateData:StateAnalyzer = None, action_order_sheet:dict = None): # Actioner가 담당하는 동작의 한 step에 해당하는 action을 생성한다.
+    #     if stateData is None:
+    #         stateData = StateAnalyzer(self.game.get_state())
+
+    #     if action_order_sheet is None:
+    #         action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
         
-        self.add_action(stateData, action_order_sheet)
-        return action_order_sheet
+    #     self.add_action(stateData, action_order_sheet)
+    #     return action_order_sheet
 
     @ abstractmethod
-    def add_action(self, stateData:StateAnalyzer, action_order_sheet:PlayerAction): # 특정 액션을 추가하는 기능을 상속 객체가 정의해야 한다.
+    def add_action(self, stateData:StateAnalyzer, action_order_sheet:PlayerAction) -> None: # 특정 액션을 추가하는 기능을 상속 객체가 정의해야 한다.
         pass
 
     @ abstractmethod
@@ -110,11 +117,11 @@ class RandomActioner(AbstractActioner):
         self.actinoer = None
         self.set_new_actioner()
 
-    def set_new_actioner(self):
+    def set_new_actioner(self) -> None:
         idx = random.randrange(len(self.actioner_generator_list))
         self.actinoer = self.actioner_generator_list[idx](self.game)
 
-    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction) -> None:
         if self.actinoer.is_finished(stateData):
             self.set_new_actioner()
         self.actinoer.add_action(stateData, action_order_sheet)

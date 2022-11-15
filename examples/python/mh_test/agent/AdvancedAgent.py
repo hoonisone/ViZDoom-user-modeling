@@ -14,19 +14,11 @@ class AdvancedAgent(AbstractAgent):
         self.moveActioner = WeaponZoneHealpackZoneCycliedVisitAction(game)
         self.weaponChangeActioner = WeaponChangeActioner(game)
     
-    def do_action(self):
-        state = StateAnalyzer(self.game)
 
-
-        action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         self.aimActioner.add_action(state, action_order_sheet)
-        # self.attackActioner.add_action(state, action_order_sheet)
         self.moveActioner.add_action(state, action_order_sheet)
-        self.weaponChangeActioner.add_action(state, action_order_sheet)
-
-        doom_action = AbstractActioner.make_into_doom_action(action_order_sheet)
-        
-        self.game.make_action(doom_action)
+        self.weaponChangeActioner.add_action(state, action_order_sheet) 
 
 class WeaponZoneHealpackZoneCycliedVisitAction(CycledActioner):
     # 무기존, 힐팩존 반복 방문
@@ -51,10 +43,3 @@ class WeaponZoneHealpackZoneCycliedVisitAction(CycledActioner):
         ]
         super().__init__(game, moveActionerList)
 
-        # class MoveToSectionActioner(VisitActioner):
-
-#     def __init__(self, game, section:Section, x_part:XPartition, y_part:YPartition):
-#         super().__init__(game, MoveToSectionActioner.get_target_pos(section, x_part, y_part))
-
-
-        # return (y, x) 
