@@ -13,7 +13,7 @@ def dist(p1, p2):
     p2 = np.array(p2)
     return np.sqrt(np.sum(np.square(p1-p2)))
 
-class StateData2:
+class StateAnalyzer:
 
     def __init__(self, game):
         self.game = game

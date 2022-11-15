@@ -1,5 +1,5 @@
 from agent.agent import *
-from state.vizdoom_object_data import *
+from state.vizdoom_state import *
 from actioner.moving_actioner import *
 from actioner.aim_actioner import *
 from actioner.weaopn_actioner import * 
@@ -14,7 +14,7 @@ class AggressiveAgent(AbstractAgent):
         
 
     def do_action(self):
-        state = StateData2(self.game)
+        state = StateAnalyzer(self.game)
 
         action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
         self.aimActioner.add_action(state, action_order_sheet)
@@ -31,7 +31,7 @@ class AggressiveMovementActioner(AbstractActioner):
         super().__init__(game)
         self.actioner = FarmingWeaponZone(game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         if self.actioner.is_finished(stateData):
             self.actioner = StayCenter(self.game)
         

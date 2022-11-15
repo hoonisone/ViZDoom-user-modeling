@@ -1,5 +1,5 @@
 from agent.agent import *
-from state.vizdoom_object_data import *
+from state.vizdoom_state import *
 from actioner.moving_actioner import *
 from actioner.aim_actioner import *
 from actioner.weaopn_actioner import * 
@@ -13,7 +13,7 @@ class PerfectAgent(AbstractAgent):
         self.weaponChangeActioner = WeaponChangeActioner(game)
 
     def do_action(self):
-        state = StateData2(self.game)
+        state = StateAnalyzer(self.game)
 
         action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
         self.aimActioner.add_action(state, action_order_sheet)
@@ -30,7 +30,7 @@ class AggressiveMovementActioner(AbstractActioner):
         super().__init__(game)
         self.actioner = FarmingWeaponZone(game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         if self.actioner.is_finished(stateData):
             self.actioner = StayCenter(self.game)
         
@@ -105,7 +105,7 @@ class AlwaysAimClosestEnomyActioner(AbstractActioner):
         self.visibleClosestEnomyAimActioner = VisibleEnomyAimActioner(game)
         self.closestEnomyAimActioner = AlwaysFixationClosestEnomyActioner(game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         target_id = stateData.get_visible_closest_enemy_label_id()
 
         if target_id is not None:
@@ -120,7 +120,7 @@ class AlwaysFixationClosestEnomyActioner(PosFixationActioner):
         self.defalt_pos = MapPos.get_pos(Section.CENTER1, XPartition.MIDDLE, YPartition.MIDDLE)
         super().__init__(game, self.defalt_pos, 2)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         self.target_pos = self.defalt_pos
 
         closest_enemy_label_id = stateData.get_closest_enemy_object_id()

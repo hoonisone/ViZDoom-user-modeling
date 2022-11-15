@@ -1,4 +1,4 @@
-from state.vizdoom_object_data import *
+from state.vizdoom_state import *
 from actioner.moving_actioner import *
 from actioner.aim_actioner import *
 from actioner.weaopn_actioner import * 

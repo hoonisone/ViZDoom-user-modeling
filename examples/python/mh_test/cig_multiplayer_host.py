@@ -7,7 +7,7 @@
 import os
 from random import choice
 import vizdoom as vzd
-from state.vizdoom_object_data import *
+from state.vizdoom_state import *
 game = vzd.DoomGame()
 
 # Use CIG example config or your own.

@@ -7,7 +7,7 @@ class WeaponChangeActioner(AbstractActioner):
     def __init__(self, game:vzd.DoomGame):
         super().__init__(game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         # return super().add_action(stateData, action_order_sheet)
         # print(stateData.state.game_variables[4])
         # p = random.random()

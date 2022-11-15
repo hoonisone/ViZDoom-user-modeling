@@ -13,7 +13,7 @@ class MoveToActioner(AbstractActioner):
         self.map = directionMap
         self.target_pos = target_pos
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
 
         player = stateData.get_object(stateData.get_player_id())
         x = int(player.position_x)
@@ -94,7 +94,7 @@ class MoveToActioner(AbstractActioner):
         return direction_list[angle]
 
 
-    def is_finished(self, stateData: StateData2) -> bool:
+    def is_finished(self, stateData: StateAnalyzer) -> bool:
         player = stateData.get_object(stateData.get_player_id())
         x = int(player.position_x)
         y = int(player.position_y)

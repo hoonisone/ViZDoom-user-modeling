@@ -1,5 +1,5 @@
 from agent.agent import *
-from vizdoom_object_data import *
+from state.vizdoom_state import *
 from actioner.moving_actioner import *
 from actioner.aim_actioner import *
 from actioner.weaopn_actioner import * 
@@ -15,7 +15,7 @@ class AdvancedAgent(AbstractAgent):
         self.weaponChangeActioner = WeaponChangeActioner(game)
     
     def do_action(self):
-        state = StateData2(self.game)
+        state = StateAnalyzer(self.game)
 
 
         action_order_sheet = AbstractActioner.make_empty_action_order_sheet()

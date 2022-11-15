@@ -10,7 +10,7 @@ else:
 """
 
 from agent.agent import *
-from state.vizdoom_object_data import *
+from state.vizdoom_state import *
 from actioner.moving_actioner import *
 from actioner.aim_actioner import *
 from actioner.weaopn_actioner import * 
@@ -26,7 +26,7 @@ class MovementActioner(AbstractActioner):
         super().__init__(game)
         pass 
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         pass
 
 class 

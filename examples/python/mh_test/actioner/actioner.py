@@ -4,7 +4,7 @@ from abc import abstractmethod
 from actioner.deathmatch_pos import *
 
 from actioner.draw_map import *
-from state.vizdoom_object_data import *
+from state.vizdoom_state import *
 from time import time
 import vizdoom as vzd
 import random
@@ -42,9 +42,9 @@ class AbstractActioner:
     def __init__(self, game:vzd.DoomGame):
         self.game = game
 
-    def make_action(self, stateData:StateData2 = None, action_order_sheet:dict = None): # Actioner가 담당하는 동작의 한 step에 해당하는 action을 생성한다.
+    def make_action(self, stateData:StateAnalyzer = None, action_order_sheet:dict = None): # Actioner가 담당하는 동작의 한 step에 해당하는 action을 생성한다.
         if stateData is None:
-            stateData = StateData2(self.game.get_state())
+            stateData = StateAnalyzer(self.game.get_state())
 
         if action_order_sheet is None:
             action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
@@ -53,11 +53,11 @@ class AbstractActioner:
         return action_order_sheet
 
     @ abstractmethod
-    def add_action(self, stateData:StateData2, action_order_sheet:PlayerAction): # 특정 액션을 추가하는 기능을 상속 객체가 정의해야 한다.
+    def add_action(self, stateData:StateAnalyzer, action_order_sheet:PlayerAction): # 특정 액션을 추가하는 기능을 상속 객체가 정의해야 한다.
         pass
 
     @ abstractmethod
-    def is_finished(self, stateData: StateData2) -> bool:
+    def is_finished(self, stateData: StateAnalyzer) -> bool:
         return False
 
     @ abstractmethod
@@ -114,7 +114,7 @@ class RandomActioner(AbstractActioner):
         idx = random.randrange(len(self.actioner_generator_list))
         self.actinoer = self.actioner_generator_list[idx](self.game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         if self.actinoer.is_finished(stateData):
             self.set_new_actioner()
         self.actinoer.add_action(stateData, action_order_sheet)
@@ -141,7 +141,7 @@ class SequentialActioner(AbstractActioner):
 
         self.sub_actioner = self.actioner_list[self.idx](self.game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         if self._is_finished: # 수행할 게 없음
             return
 
@@ -150,7 +150,7 @@ class SequentialActioner(AbstractActioner):
         
         self.sub_actioner.add_action(stateData, action_order_sheet)
 
-    def is_finished(self, stateData: StateData2) -> bool:
+    def is_finished(self, stateData: StateAnalyzer) -> bool:
         return self._is_finished
         
 class CycledActioner(AbstractActioner):
@@ -166,7 +166,7 @@ class CycledActioner(AbstractActioner):
     def set_sequential_actioner(self):
         self.sequentialVisitActioner = SequentialActioner(self.game, self.actioner_generator_list)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         if self.sequentialVisitActioner.is_finished(stateData): # 끝나면 다시시작
             self.set_sequential_actioner()
 

@@ -1,7 +1,7 @@
 import vizdoom as vzd
 import math
 from actioner.deathmatch_pos import *
-from state.vizdoom_object_data import *
+from state.vizdoom_state import *
 from actioner.actioner import * 
 
 import random
@@ -13,7 +13,7 @@ class AimActioner(AbstractActioner):
         self.visibleClosestEnomyAimActioner = VisibleEnomyAimActioner(game)
         self.closestEnomyAimActioner = ClosestEnomyAimActioner(game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         target_id = stateData.get_visible_closest_enemy_label_id()
 
         if target_id is not None:
@@ -40,7 +40,7 @@ class PosFixationActioner(AbstractActioner):
         self.target_pos = target_pos
         self.slow = slow
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         (x, y) = stateData.get_player_pos()
         (tx, ty) = self.target_pos
         r_x, r_y = tx-x, ty-y
@@ -102,7 +102,7 @@ class RandomPosFixationAction(AbstractActioner):
         self.change_p = change_p
         self.change_sub_actioner()
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         if random.random() < self.change_p:
             self.change_sub_actioner()
         self.sub_actioner.add_action(stateData, action_order_sheet)    
@@ -140,7 +140,7 @@ class VisibleEnomyAimActioner(AbstractActioner):
     def __init__(self, game: vzd.DoomGame):
         super().__init__(game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         target_id = stateData.get_visible_closest_enemy_label_id()
         if target_id is None:
             return
@@ -162,7 +162,7 @@ class ClosestEnomyAimActioner(AbstractActioner):
     def __init__(self, game: vzd.DoomGame):
         super().__init__(game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         target_id = stateData.get_closest_enemy_label_id()
         if target_id is None:
             return
@@ -180,7 +180,7 @@ class AttackActioner(AbstractActioner):
     def __init__(self, game: vzd.DoomGame):
         super().__init__(game)
 
-    def add_action(self, stateData: StateData2, action_order_sheet: PlayerAction):
+    def add_action(self, stateData: StateAnalyzer, action_order_sheet: PlayerAction):
         if len(stateData.get_enemy_label_id_list()) >= 4:
             action_order_sheet[PlayerAction.Atack] = 1
             return
