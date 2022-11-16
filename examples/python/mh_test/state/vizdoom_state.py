@@ -36,6 +36,16 @@ class StateAnalyzer:
         self.weapon_ammo = None
         self.weapon_possess = None
 
+    def get_death_count(self):
+        if self.state == None:
+            return 0
+        return self.state.game_variables[GameVariable.DEAD]
+         
+    def get_kill_count(self):
+        if self.state == None:
+            return 0
+        return self.state.game_variables[GameVariable.KILLCOUNT]
+
     def get_player_hp(self):
         return self.state.game_variables[GameVariable.HEALTH]
 

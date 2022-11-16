@@ -41,11 +41,12 @@ class AbstractActioner:
 
     def __init__(self, game:vzd.DoomGame):
         self.game = game
+        self.state = None
 
     def do_action(self) -> None:
-        state = StateAnalyzer(self.game)
+        self.state = StateAnalyzer(self.game)
         action_order_sheet = AbstractActioner.make_empty_action_order_sheet()
-        self.add_action(state, action_order_sheet)
+        self.add_action(self.state, action_order_sheet)
         doom_action = AbstractActioner.make_into_doom_action(action_order_sheet)
         self.game.make_action(doom_action)
 

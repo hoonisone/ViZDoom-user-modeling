@@ -40,11 +40,15 @@ game.add_game_args("-host 2 "
 # colors: 0 - green, 1 - gray, 2 - brown, 3 - red, 4 - light gray, 5 - light brown, 6 - light red, 7 - light blue
 game.add_game_args("+name Host +colorset 0")
 
+
 # During the competition, async mode will be forced for all agents.
 #game.set_mode(vzd.Mode.PLAYER)
 game.set_mode(vzd.Mode.ASYNC_PLAYER)
 
 #game.set_window_visible(False)
+
+
+
 
 game.init()
 

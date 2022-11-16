@@ -26,3 +26,9 @@ class GameVariable(IntEnum):
         POSITION_Y = 20
         POSITION_Z = 21
 
+        HITCOUNT = 22
+        HITS_TAKEN = 23
+        DEAD = 24
+        DAMAGECOUNT = 25
+        DAMAGE_TAKEN = 26
+

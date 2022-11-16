@@ -5,20 +5,15 @@
 #####################################################################
 
 import os
-from random import choice
 import vizdoom as vzd
 from state.vizdoom_state import *
-game = vzd.DoomGame()
+import pandas as pd
+import datetime as dt
 
-# Use CIG example config or your own.
-# scenarios_path = 'C:\\Users\\sci2019\\Game_Project\\VizDoom\\scenarios'
-scenarios_path = '../../../scenarios'
-game.load_config(os.path.join(scenarios_path, "deathmatch_multi.cfg"))
+game = vzd.DoomGame()
+game.load_config(os.path.join('../../../scenarios', "deathmatch_multi.cfg"))
 
 game.set_doom_map("map01")  # Limited deathmatch.
-#game.set_doom_map("map02")  # Full deathmatch.
-
-# Host game with options that will be used in the competition.
 game.add_game_args("-host 2 "  
                    # This machine will function as a host for a multiplayer game with this many players (including this machine). 
                    # It will wait for other machines to connect using the -join parameter and then start the game when everyone is connected.
@@ -34,43 +29,68 @@ game.add_game_args("-host 2 "
                    "+viz_respawn_delay 2 "   # Sets delay between respawns (in seconds, default is 0).
                    "+viz_nocheat 0")          # Disables depth and labels buffer and the ability to use commands that could interfere with multiplayer game.
 
-# This can be used to host game without taking part in it (can be simply added as argument of vizdoom executable).
-#game.add_game_args("+viz_spectator 1")
-
-# Name your agent and select color
-# colors: 0 - green, 1 - gray, 2 - brown, 3 - red, 4 - light gray, 5 - light brown, 6 - light red, 7 - light blue
 game.add_game_args("+name Host +colorset 0")
-
-# During the competition, async mode will be forced for all agents.
-#game.set_mode(vzd.Mode.PLAYER)
-# game.set_mode(vzd.Mode.ASYNC_PLAYER)
-# game.set_mode(vzd.Mode.SPECTATOR)
+game.add_game_args("-record player2.lmp")
 game.set_mode(vzd.Mode.ASYNC_SPECTATOR)
 
-#game.set_window_visible(False)
 
-game.init()
+LOG_PATH = "play_log.csv"
+COLUMNS = ["id", "name", "episode", "agent", "start_time", "end_time", "kill", "dead"]
 
-# Three example sample actions
+# log 파일 불러오기 또는 생성
+if os.path.isfile(LOG_PATH):
+    print("있음")
+    log_df = pd.read_csv(LOG_PATH, encoding='cp949')
+else:
+    log_df = pd.DataFrame(columns=COLUMNS)
 
-# Play until the game (episode) is over.
-while not game.is_episode_finished():
+# id 정보 생성 및 입력
+id = 0 if len(log_df["id"]) == 0 else max(log_df["id"])+1
+name = input("name: ")
 
-    # Get the state.
-    s = game.get_state()
+enemy_list = [
+    "defensive",
+    "aggressive",
+    "hider",
+    "runner",
+    "defensive",
+    "defensive",
+    "aggressive",
+    "hider",
+    "runner",
+    "defensive",
+]
 
-    # Analyze the state.
+for episode, enemy in enumerate(enemy_list):
+    acc_kill = 0
+    acc_death = 0
+    kill = 0
+    death = 0
+    game.init()
+    start_time = dt.datetime.now()
 
-    # Make your action.
-    game.advance_action()
-    # 이거 있어야 조작 가능
-    # game.make_action(choice(actions))
-    # game.make_action()
-    
-    
-    # Check if player is dead
-    if game.is_player_dead():
-        # Use this to respawn immediately after death, new state will be available.
-        game.respawn_player()
+    while not game.is_episode_finished():
+        game.advance_action()
+        state = StateAnalyzer(game)
+        
+        
+        kill = max(kill, state.get_kill_count())
+        death = max(death, state.get_death_count())
+        
+        print("kill: ", acc_kill, "death: ", acc_death)
 
-game.close()
+        if game.is_player_dead():
+            acc_kill += kill
+            acc_death += death
+            kill = death = 0
+
+            game.respawn_player()
+    acc_kill += kill
+    acc_death += death
+
+    end_time = dt.datetime.now()
+    eposode_log = [id, name, episode, enemy, start_time, end_time, acc_kill, acc_death]    
+    log_df.loc[len(log_df)] = eposode_log
+    game.close()
+
+log_df.to_csv(LOG_PATH, index=False, encoding='cp949')
