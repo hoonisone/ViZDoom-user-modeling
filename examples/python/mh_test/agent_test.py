@@ -1,121 +1,134 @@
-#!/usr/bin/env python3
-
-#####################################################################
-# This script presents SPECTATOR mode. In SPECTATOR mode you play and
-# your agent can learn from it.
-# Configuration is loaded from "../../scenarios/<SCENARIO_NAME>.cfg" file.
-# 
-# To see the scenario description go to "../../scenarios/README.md"
-#####################################################################
-
-from argparse import ArgumentParser
-from gc import is_finalized
-from inspect import modulesbyfile
-from msilib.schema import MoveFile
 import os
-from pydoc import ispackage
-from time import sleep
-from turtle import st
-from matplotlib.axis import Tick
 import vizdoom as vzd
-
-from PIL import Image
-from random import choice
+from agent.banlencedAgent import *
+from agent.RunnerAgent import *
+from agent.HiderAgent import *
+import pandas as pd
+import datetime as dt
+from log.vizdoom_log_util import *
+from argparse import ArgumentParser
+import os
+from time import sleep
+import vizdoom as vzd
 import keyboard
-import matplotlib.pyplot as plt
+import json
+from time import *
 import numpy as np
-from vizdoom_object_data import *
- 
-import cv2
-from agent.agent import *
-from agent.AdvancedAgent import *
-from agent.AggressiveAgent import *
+from datetime import datetime, timedelta
 
-from draw_map import *
+LOG_PATH = "agent_deathmatch_log.csv"
+COLUMNS = ["id", "name", "episode", "agent", "start_time", "end_time", "kill", "dead"]
 
-# scenarios_path = '../../../scenarios'
-# game.load_config(os.path.join(scenarios_path, "deathmatch_multi.cfg"))
+# log 파일 불러오기 또는 생성
+if os.path.isfile(LOG_PATH):
+    log_df = pd.read_csv(LOG_PATH, encoding='cp949')
+else:
+    log_df = pd.DataFrame(columns=COLUMNS)
 
-# DEFAULT_CONFIG = os.path.join(vzd.scenarios_path, "deathmatch.cfg")
-DEFAULT_CONFIG = os.path.join('../../../scenarios', "deathmatch.cfg")
+# id 정보 생성 및 입력
+# id = 0 if len(log_df["id"]) == 0 else max(log_df["id"])+1
 
-from vizdoom_object_state_analysis import *
-
-
-list = [(10000 for i in range(2000)) for i in range(2000)]
-
-
-
-if __name__ == "__main__":
-    parser = ArgumentParser("ViZDoom example showing how to use SPECTATOR mode.")
-    parser.add_argument(dest="config",
-                        default=DEFAULT_CONFIG,
-                        nargs="?",
-                        help="Path to the configuration file of the scenario."
-                             " Please see "
-                             "../../scenarios/*cfg for more scenarios.")
-    args = parser.parse_args()
-    game = vzd.DoomGame()
-
-    # Choose scenario config file you wish to watch.
-    # Don't load two configs cause the second will overrite the first one.
-    # Multiple config files are ok but combining these ones doesn't make much sense.
-
-    game.load_config(args.config)
-
-    # Enables freelook in engine
-    game.add_game_args("+freelook 1")
-
-    # game.set_screen_resolution(vzd.ScreenResolution.RES_1920X1080)
-    game.set_screen_resolution(vzd.ScreenResolution.RES_640X480)
-    # game.set_screen_resolution(vzd.ScreenResolution.RES_1280X800)
-
-    # Enables spectator mode, so you can play. Sounds strange but it is the agent who is supposed to watch not you.
-    game.set_window_visible(True)
-
-    game.set_objects_info_enabled(True)
-    game.set_sectors_info_enabled(True)
-    game.set_labels_buffer_enabled(True)
-    game.set_automap_buffer_enabled(True)
-    game.set_depth_buffer_enabled(True)
-
-    # game.add_available_game_variable(vzd.GameVariable.POSITION_X)
-    # game.add_available_game_variable(vzd.GameVariable.POSITION_Y)
-    # game.add_available_game_variable(vzd.GameVariable.POSITION_Z)
-
-    # game.set_mode(vzd.Mode.SPECTATOR) # 동작을 직접 넣을 거면 실행 x
-
-    game.init()
-    game.new_episode()
-    # agent = AdvancedAgent(game)
-    agent = AggressiveAgent(game)
-
-    while not game.is_episode_finished():   
-        # print(StateData2(game).get_weapon_possess())
-        # print(StateData2(game).get_weapon_ammo())
-        agent.do_action()
-        # empty = AbstractActioner.make_empty_action_order_sheet()
-        # empty[PlayerAction.weapone6] = 1
-        # empty = AbstractActioner.make_into_doom_action(empty)
-        # game.make_action(empty)
-
-        # empty = AbstractActioner.make_empty_action_order_sheet()
-        # actioner.add_action(stateData, empty)
-        # game.make_action(AbstractActioner.make_into_doom_action(empty)) 
-        # name = ["Top", "Right", "Cector", "Right", "botton", "left", "centor", "left"]
-        # print(name[actioner.idx], actioner.is_finished(stateData))
-    game.close()
+agent_generator_list = [
+    lambda : DefensiveAgent(game),
+    lambda : AggressiveAgent(game),
+    lambda : AimerAgent(game),
+    lambda : HiderAgent(game),
+    lambda : RunnerAgent(game),
+    lambda : DefensiveAgent(game),
+    lambda : AggressiveAgent(game),
+    lambda : AimerAgent(game),
+    lambda : HiderAgent(game),
+    lambda : RunnerAgent(game),
+]
+enemy_list = [
+    "defensive",
+    "aggressive",
+    "aimer",
+    "hider",
+    "runner"
+]
 
 
-"""
-[objects]
-맵에 존재하는 모든 오브젝트의 정보를 얻을 수 있다.
-아이템, 적 모두 나옴 (메인 캐릭터 포함)
-아이템을 먹거나 적이 생기면 그만큼 줄어들고 늘어나는 것 확인
-정보가 정확한지는 굳이 테스트 안함
+# episode = int(input("episode: "))
+name = "enemy"
 
-[sector]
-맵의 영역과 바닥과 천장의 높이 값 알 수 있음
-영역을 두 좌표를 잇는 선의 집합으로 표현
-좌표가 실제 위치 좌표임 => 오브젝트 위치를 좌표 그대로 찍으면 표시 가능
-"""
+
+
+
+# start = int(input("start: "))
+id = 0
+heads = ['time', 'timestamp', 'ATTACK', 'SPEED', 'STRAFE', 'MOVE_RIGHT', 'MOVE_LEFT', 'MOVE_BACKWARD', 'MOVE_FORWARD', 'TURN_RIGHT', 'TURN_LEFT', 'USE', 'SELECT_WEAPON1', 'SELECT_WEAPON2', 'SELECT_WEAPON3', 'SELECT_WEAPON4', 'SELECT_WEAPON5', 'SELECT_WEAPON6', 'SELECT_NEXT_WEAPON', 'SELECT_PREV_WEAPON', 'LOOK_UP_DOWN_DELTA', 'TURN_LEFT_RIGHT_DELTA', 'MOVE_LEFT_RIGHT_DELTA', 'KILLCOUNT', 'HEALTH', 'ARMOR', 'SELECTED_WEAPON', 'SELECTED_WEAPON_AMMO']
+episode = int(input("episode"))
+for a in range(1):
+    for i in range(10, 20):
+        log_data = []
+        acc_kill = 0
+        acc_death = 0
+        kill = 0
+        death = 0
+
+        enemy = enemy_list[episode]
+        print("step: ", id, "agent: ", "enemy")
+        t = time()
+        start_time = dt.datetime.now()
+
+        game = vzd.DoomGame()
+        game.load_config(os.path.join('../../../scenarios', "deathmatch.cfg"))
+        game.set_window_visible(True)
+        game.set_objects_info_enabled(True)
+        game.set_sectors_info_enabled(True)
+        game.set_labels_buffer_enabled(True)
+        
+        game.add_game_args("-record agent-%s-%d.lmp"%(enemy_list[episode], i))
+        # game.add_game_args(  
+        #             # This machine will function as a host for a multiplayer game with this many players (including this machine). 
+        #             # It will wait for other machines to connect using the -join parameter and then start the game when everyone is connected.
+        #             "-deathmatch "             # Deathmatch rules are used for the game.
+        #             # "+sv_forcerespawn 1 "      # Players will respawn automatically after they die.
+        #             "+sv_respawnprotect 1 "    # Players will be invulnerable for two second after spawning.
+        #             "+sv_spawnfarthest 1 "     # Players will be spawned as far as possible from any other players.
+        #             "+viz_respawn_delay 2 "   # Sets delay between respawns (in seconds, default is 0).
+        #             "+viz_nocheat 0")          # Disables depth and labels buffer and the ability to use commands that could interfere with multiplayer game.
+        game.init()
+
+        agent = agent_generator_list[episode]()
+
+        while not game.is_episode_finished():
+            agent.do_action()
+            state = StateAnalyzer(game)
+            kill = max(kill, state.get_kill_count())       
+
+            if game.is_player_dead():
+                death = 1
+                break
+
+            state = game.get_state()
+            now_time = str(datetime.utcnow() + timedelta(hours=9))
+            elp_time = time()-t
+
+            last_action = game.get_last_action()
+            variables = state.game_variables
+            var = np.concatenate(([now_time], [elp_time], last_action, variables), axis=0)
+            basic = {}
+            for j, name in enumerate(heads):
+                basic[name] = var[j]
+
+            state_data = get_state_log(state)
+            state_data["basic"] = basic
+            log_data.append(state_data)
+
+            print(time()-t)
+            if time()-t > 60:
+                break
+
+
+        log_data = json.dumps(log_data)
+        with open("log-%s-%d.json"%(enemy_list[episode], i), "w") as f:
+            f.write(log_data)
+            
+
+        end_time = dt.datetime.now()
+        eposode_log = [id, name, episode, enemy, start_time, end_time, kill, death]
+        log_df.loc[len(log_df)] = eposode_log
+        game.close()
+        log_df.to_csv(LOG_PATH, index=False, encoding='cp949')
