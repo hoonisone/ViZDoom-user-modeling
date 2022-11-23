@@ -14,6 +14,8 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import os
 from actioner.deathmatch_pos import *
+import matplotlib.image as mpimg
+import json
 # DEFAULT_CONFIG = os.path.join(vzd.scenarios_path, "my_way_home.cfg")
 DEFAULT_CONFIG = os.path.join('../../../scenarios', "deathmatch.cfg")
 
@@ -52,26 +54,38 @@ if __name__ =="__main__":
 
     episodes = 10
     sleep_time = 1.0 / vzd.DEFAULT_TICRATE  # = 0.028
-
+    # plt.axis([-300,1000,-300,1000])
+    plt.ion()
+    plt.show()
+    img = mpimg.imread('deathmatch_map.png')
+    plt.imshow(img)
+    
     for i in range(episodes):
         print("Episode #" + str(i + 1))
     
         # Not needed for the first episode but the loop is nicer.
         game.new_episode()
         while not game.is_episode_finished():
+            
     
             # Gets the state
             state = game.get_state()
             game.make_action(choice(actions))
-    
-            print("State #" + str(state.number))
-            print("Player position: x:", state.game_variables[0], ", y:", state.game_variables[1], ", z:", state.game_variables[2])
-            print("Objects:")
+            sectors = []
+            for s in state.sectors:
+                lines = []
+                for l in s.lines:
+                    if l.is_blocking:
+                        lines.append([l.x1, l.x2, l.y1, l.y2])
+                sectors.append(lines)
+
+            print(sectors)
+            log_data = json.dumps(sectors)
+            with open("deathmatch_map_sector.json", "w") as f:
+                f.write(log_data)
     
             # Print information about objects present in the episode.
             for o in state.objects:
-                print("Object id:", o.id, "object name:", o.name)
-                print("Object position: x:", o.position_x, ", y:", o.position_y, ", z:", o.position_z)
 
                 # Other available fields:
                 #print("Object rotation angle", o.angle, "pitch:", o.pitch, "roll:", o.roll)
@@ -83,19 +97,12 @@ if __name__ =="__main__":
                 else:
                     plt.plot(o.position_x, o.position_y, color='red', marker='o')
     
-            print("=====================")
-
-            print("Sectors:")
-
             # Print information about sectors.
-            for s in state.sectors:
-                print("Sector floor height:", s.floor_height, ", ceiling height:", s.ceiling_height)
-                print("Sector lines:", [(l.x1, l.y1, l.x2, l.y2, l.is_blocking) for l in s.lines])
-
-                # Plot sector on map
-                for l in s.lines:
-                    if l.is_blocking:
-                        plt.plot([l.x1, l.x2], [l.y1, l.y2], color='black', linewidth=2)
+            # for s in state.sectors:
+                # # Plot sector on map
+                # for l in s.lines:
+                #     if l.is_blocking:
+                #         plt.plot([l.x1, l.x2], [l.y1, l.y2], color='black', linewidth=2)
             
             pos_list = []
             sections = [
@@ -111,17 +118,22 @@ if __name__ =="__main__":
                 Section.RIGHT_PESSAGE
                 ]
 
-            for section in sections:
-                for x in range(3):
-                    for y in [3, 4, 5]:
-                        pos_list.append(MapPos.get_pos(section, x, y))
+            # for section in sections:
+            #     for x in range(3):
+            #         for y in [3, 4, 5]:
+            #             pos_list.append(MapPos.get_pos(section, x, y))
                         
-            for pos in pos_list:
-                plt.plot(pos[0], pos[1], color='blue', marker='o')
+            # for pos in pos_list:
+            #     plt.plot(pos[0], pos[1], color='blue', marker='o')
             # plt.plot(1060, 210, color='blue', marker='o')
             # Show map
-            plt.show()
 
+            
+            plt.draw()
+            plt.pause(0.0001)
+
+            
+            
         print("Episode finished!")
 
     # It will be done automatically anyway but sometimes you need to do it in the middle of the program...
