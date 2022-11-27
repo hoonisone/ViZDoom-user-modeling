@@ -78,15 +78,17 @@ if __name__ == "__main__":
         game.new_episode()
 
         while not game.is_episode_finished():
-            state = game.get_state()
 
-            last_action = game.get_last_action()
-            reward = game.get_last_reward()
-            variables = state.game_variables
+            # reward = game.get_last_reward()
+
+
+            state = game.get_state()
             now_time = str(datetime.utcnow() + timedelta(hours=9))
             now = time.time()
-
             elp_time = now - start_time
+
+            last_action = game.get_last_action()
+            variables = state.game_variables
             var = np.concatenate(([now_time], [elp_time], last_action, variables), axis=0)
             basic = {}
             for i, name in enumerate(heads):
