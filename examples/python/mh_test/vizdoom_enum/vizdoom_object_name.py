@@ -1,8 +1,16 @@
 from enum import Enum
 from typing import ClassVar
 
+label_list = ["Player", "Enemy", "Armor", "Heal", "Weapon", "Ammo", "Particle"]
 
+
+player_name_list = ["DoomPlayer"]
 enemy_name_list = ["Demon", "Zombieman", "ChaingunGuy", "ShotgunGuy", "HellKnight", "MarineChainsawVzd"]
+armor_name_list = ["BlueArmor", "GreenArmor", "ArmorBonus"] 
+heal_name_list = ["Medikit", "HealthBonus", "Stimpack"]
+weapon_name_list = ["SuperShotgun", "PlasmaRifle", "RocketLauncher", "Chainsaw", "Chaingun"]
+ammo_name_list = ["CellPack", "RocketBox", "ShellBox", "ClipBox"]
+particle_name_list = ["BulletPuff", "PlasmaBall", "Rocket", "BaronBall"]
 
 object_name_dict = {}
 object_name_dict["BlueArmor"] = 1

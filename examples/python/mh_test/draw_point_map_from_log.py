@@ -17,6 +17,34 @@ with open(MAP_FILE_NAME, "r") as f:
 with open(LOG_FILE_NAME, "r") as f:
     data = json.load(f)
 
+label_name_list = {
+    "Player":player_name_list, 
+    "Enemy":enemy_name_list,
+    "Armor":armor_name_list,
+    "Heal":heal_name_list,
+    "Weapon":weapon_name_list,
+    "Ammo":ammo_name_list,
+    "Particle":particle_name_list
+}
+label_color = {
+    "Player":"blue", 
+    "Enemy":"red",
+    "Armor":"green",
+    "Heal":"green",
+    "Weapon":"black",
+    "Ammo":"black",
+    "Particle":"orange"
+}
+label_marker = {
+    "Player":"o", 
+    "Enemy":"o",
+    "Armor":"*",
+    "Heal":"+",
+    "Weapon":"D",
+    "Ammo":".",
+    "Particle":"x"
+}
+
 for frame in data:
 
     # 맵 그리기
@@ -27,22 +55,42 @@ for frame in data:
             plt.plot(l[:2], l[2:], color='black', linewidth=2)
 
     # object 좌표 수집
-    pos_list = [[], [], []] # 나, 적, 아이템
+    label_point_list = {
+        "Player":[[], []], 
+        "Enemy":[[], []],
+        "Armor":[[], []],
+        "Heal":[[], []],
+        "Weapon":[[], []],
+        "Ammo":[[], []],
+        "Particle":[[], []]
+    }
     for o in frame["objects"]:
-        if o["name"] == "DoomPlayer":
-            pos_list[0].append([o["lx"], o["ly"]])
-        elif o["name"] in enemy_name_list:
-            pos_list[1].append([o["lx"], o["ly"]])
-        else:
-            pos_list[2].append([o["lx"], o["ly"]])
+        for label in label_list:
+            if o["name"] in label_name_list[label]:
+                label_point_list[label][0].append(o["lx"])
+                label_point_list[label][1].append(o["ly"])
+                break
 
-    colors = ["green", "red", "blue"]
-    for i in range(3):
-        for pos in pos_list[i]:
-            plt.plot(pos[0], pos[1], color=colors[i], marker='o')
+    for label in label_list:
+        print(label_point_list[label])
+        plt.plot(label_point_list[label][0], label_point_list[label][1], color=label_color[label], marker = label_marker[label], linewidth=0)
+
+    # pos_list = [[], [], []] # 나, 적, 아이템
+    # for o in frame["objects"]:
+    #     if o["name"] == "DoomPlayer":
+    #         pos_list[0].append([o["lx"], o["ly"]])
+    #     elif o["name"] in enemy_name_list:
+    #         pos_list[1].append([o["lx"], o["ly"]])
+    #     else:
+    #         pos_list[2].append([o["lx"], o["ly"]])
+
+    # colors = ["green", "red", "blue"]
+    # for i in range(3):
+    #     for pos in pos_list[i]:
+    #         plt.plot(pos[0], pos[1], color=colors[i], marker='o')
 
     plt.draw()
-    plt.pause(0.001)
+    plt.pause(0.02)
     plt.cla()
 
     # for s in sectors:
